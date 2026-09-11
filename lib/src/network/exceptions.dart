@@ -22,7 +22,8 @@ abstract class HubSightException implements Exception {
   String get message => developerMessage;
 
   @override
-  String toString() => '$runtimeType(code: ${code.wireCode}, status: $statusCode): $developerMessage';
+  String toString() =>
+      '$runtimeType(code: ${code.wireCode}, status: $statusCode): $developerMessage';
 }
 
 /// Generic API error returned from HubSight backend.
@@ -37,7 +38,8 @@ class HubSightApiException extends HubSightException {
     this.details,
   });
 
-  factory HubSightApiException.fromJson(Map<String, dynamic> json, int? statusCode) {
+  factory HubSightApiException.fromJson(
+      Map<String, dynamic> json, int? statusCode) {
     final rawCode = json['code'] as String?;
     final code = HubSightErrorCode.fromBackendCode(rawCode, statusCode);
     final devMsg = json['message_en'] as String? ??
@@ -68,7 +70,8 @@ class HubSightAuthException extends HubSightApiException {
 /// Thrown when session has completely expired and refresh token is invalid or revoked.
 class HubSightSessionExpiredException extends HubSightAuthException {
   const HubSightSessionExpiredException([
-    String developerMessage = 'Session expired and refresh token could not renew access.',
+    String developerMessage =
+        'Session expired and refresh token could not renew access.',
   ]) : super(
           code: HubSightErrorCode.authSessionExpired,
           statusCode: 401,
@@ -82,14 +85,16 @@ class HubSightMaintenanceException extends HubSightException {
 
   const HubSightMaintenanceException({
     this.retryAfterSeconds = 300,
-    super.developerMessage = 'App API access is temporarily paused for maintenance.',
+    super.developerMessage =
+        'App API access is temporarily paused for maintenance.',
     super.rawResponse,
   }) : super(
           code: HubSightErrorCode.systemMaintenance,
           statusCode: 503,
         );
 
-  factory HubSightMaintenanceException.fromJson(Map<String, dynamic> json, int retryAfter) {
+  factory HubSightMaintenanceException.fromJson(
+      Map<String, dynamic> json, int retryAfter) {
     return HubSightMaintenanceException(
       retryAfterSeconds: retryAfter,
       developerMessage: json['message_en'] as String? ??

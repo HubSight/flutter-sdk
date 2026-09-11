@@ -105,7 +105,8 @@ class _HubSightMultiViewGridState extends State<HubSightMultiViewGrid> {
           return Container(
             color: Colors.black87,
             child: const Center(
-              child: Text('Đang tải...', style: TextStyle(color: Colors.white54)),
+              child:
+                  Text('Đang tải...', style: TextStyle(color: Colors.white54)),
             ),
           );
         }

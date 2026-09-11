@@ -30,7 +30,8 @@ class AuthResult {
         isSuccess: false,
         requires2FA: true,
         preAuthToken: json['pre_auth_token'] as String?,
-        message: json['message'] as String? ?? 'Yêu cầu xác thực hai bước (2FA).',
+        message:
+            json['message'] as String? ?? 'Yêu cầu xác thực hai bước (2FA).',
       );
     }
 

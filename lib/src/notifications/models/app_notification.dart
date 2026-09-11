@@ -35,7 +35,8 @@ class AppNotification {
       memberId: json['member_id'] as String?,
       thumbnailUrl: json['thumbnail_url'] as String?,
       isRead: json['is_read'] as bool? ?? false,
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -79,7 +80,8 @@ class NotificationListResponse {
       limit: json['limit'] as int? ?? 20,
       total: json['total'] as int? ?? 0,
       items: itemsRaw
-          .map((e) => AppNotification.fromJson(Map<String, dynamic>.from(e as Map)))
+          .map((e) =>
+              AppNotification.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
     );
   }

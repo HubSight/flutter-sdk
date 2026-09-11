@@ -27,9 +27,11 @@ class HubSightRelayClient {
 
   bool get isConnected => _isConnected;
   Stream<bool> get onConnectionChanged => _connectionController.stream;
-  Stream<SessionRevokedEvent> get onSessionRevoked => _sessionRevokedController.stream;
+  Stream<SessionRevokedEvent> get onSessionRevoked =>
+      _sessionRevokedController.stream;
   Stream<AIAlertEvent> get onAIAlert => _aiAlertController.stream;
-  Stream<CameraStatusEvent> get onCameraStatus => _cameraStatusController.stream;
+  Stream<CameraStatusEvent> get onCameraStatus =>
+      _cameraStatusController.stream;
 
   /// Connect to the realtime WebSocket relay server.
   Future<void> connect() async {
@@ -45,7 +47,8 @@ class HubSightRelayClient {
           .setTransports(['websocket'])
           .disableAutoConnect()
           .setExtraHeaders({
-            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
           })
           .build(),
     );
@@ -68,7 +71,8 @@ class HubSightRelayClient {
     // Realtime session revocation (forced kick-out)
     _socket!.on('session:revoked', (data) {
       if (data is Map) {
-        final event = SessionRevokedEvent.fromJson(Map<String, dynamic>.from(data));
+        final event =
+            SessionRevokedEvent.fromJson(Map<String, dynamic>.from(data));
         _sessionRevokedController.add(event);
       }
     });
@@ -84,7 +88,8 @@ class HubSightRelayClient {
     // Camera online/offline status changes
     _socket!.on('camera:status', (data) {
       if (data is Map) {
-        final event = CameraStatusEvent.fromJson(Map<String, dynamic>.from(data));
+        final event =
+            CameraStatusEvent.fromJson(Map<String, dynamic>.from(data));
         _cameraStatusController.add(event);
       }
     });

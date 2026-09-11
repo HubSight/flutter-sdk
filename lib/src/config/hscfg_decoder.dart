@@ -36,7 +36,8 @@ class HscfgDecoder {
     if (fileBytes.length < 50) {
       throw const HubSightConfigException(
         code: HubSightErrorCode.configCorrupted,
-        developerMessage: 'Configuration file is corrupted or below minimum container size (50 bytes).',
+        developerMessage:
+            'Configuration file is corrupted or below minimum container size (50 bytes).',
       );
     }
 
@@ -57,7 +58,8 @@ class HscfgDecoder {
     if (ciphertextWithTag.length < 16) {
       throw const HubSightConfigException(
         code: HubSightErrorCode.configCorrupted,
-        developerMessage: 'Ciphertext missing required 16-byte GCM authentication tag.',
+        developerMessage:
+            'Ciphertext missing required 16-byte GCM authentication tag.',
       );
     }
 
@@ -97,7 +99,8 @@ class HscfgDecoder {
     } catch (e) {
       throw const HubSightConfigException(
         code: HubSightErrorCode.configDecryptionFailed,
-        developerMessage: 'AES-256-GCM decryption failed: incorrect PIN or tampered payload.',
+        developerMessage:
+            'AES-256-GCM decryption failed: incorrect PIN or tampered payload.',
       );
     }
 
@@ -203,7 +206,8 @@ class HscfgDecoder {
         if (!isValid) {
           throw const HubSightConfigException(
             code: HubSightErrorCode.configInvalidSignature,
-            developerMessage: 'Ed25519 digital signature mismatch: payload may have been tampered.',
+            developerMessage:
+                'Ed25519 digital signature mismatch: payload may have been tampered.',
           );
         }
       } catch (e) {

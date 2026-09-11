@@ -16,7 +16,8 @@ class HubSightSecureStorage {
       : _storage = storage ??
             const FlutterSecureStorage(
               aOptions: AndroidOptions(encryptedSharedPreferences: true),
-              iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+              iOptions:
+                  IOSOptions(accessibility: KeychainAccessibility.first_unlock),
             );
 
   /// Save access and refresh tokens.
@@ -48,9 +49,12 @@ class HubSightSecureStorage {
 
   /// Save decrypted AppConfig into secure storage.
   Future<void> saveAppConfig(HubSightAppConfig config) async {
-    await _storage.write(key: _keyConfigUrls, value: jsonEncode(config.urls.toMap()));
-    await _storage.write(key: _keyConfigKey, value: jsonEncode(config.key.toMap()));
-    await _storage.write(key: _keyConfigMetadata, value: jsonEncode(config.metadata.toMap()));
+    await _storage.write(
+        key: _keyConfigUrls, value: jsonEncode(config.urls.toMap()));
+    await _storage.write(
+        key: _keyConfigKey, value: jsonEncode(config.key.toMap()));
+    await _storage.write(
+        key: _keyConfigMetadata, value: jsonEncode(config.metadata.toMap()));
   }
 
   /// Load cached AppConfig if available.
@@ -64,9 +68,12 @@ class HubSightSecureStorage {
     }
 
     try {
-      final urls = HubSightUrls.fromMap(jsonDecode(urlsJson) as Map<String, dynamic>);
-      final key = HubSightClientKey.fromMap(jsonDecode(keyJson) as Map<String, dynamic>);
-      final meta = HubSightConfigMetadata.fromMap(jsonDecode(metaJson) as Map<String, dynamic>);
+      final urls =
+          HubSightUrls.fromMap(jsonDecode(urlsJson) as Map<String, dynamic>);
+      final key = HubSightClientKey.fromMap(
+          jsonDecode(keyJson) as Map<String, dynamic>);
+      final meta = HubSightConfigMetadata.fromMap(
+          jsonDecode(metaJson) as Map<String, dynamic>);
 
       return HubSightAppConfig(
         urls: urls,

@@ -60,12 +60,15 @@ void main() {
     });
 
     test('deleteNotification completes successfully', () async {
-      await expectLater(notifService.deleteNotification('notif_001'), completes);
+      await expectLater(
+          notifService.deleteNotification('notif_001'), completes);
     });
 
     test('fcmManager registers and unregisters push tokens', () async {
-      await expectLater(fcmManager.registerPushToken('fcm_token_sample_123'), completes);
-      await expectLater(fcmManager.unregisterPushToken('fcm_token_sample_123'), completes);
+      await expectLater(
+          fcmManager.registerPushToken('fcm_token_sample_123'), completes);
+      await expectLater(
+          fcmManager.unregisterPushToken('fcm_token_sample_123'), completes);
     });
   });
 }
@@ -83,7 +86,9 @@ class _MockNotificationAdapter implements HttpClientAdapter {
       return ResponseBody.fromString(
         jsonEncode({'status': 'ok', 'unread_count': 4}),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -110,7 +115,9 @@ class _MockNotificationAdapter implements HttpClientAdapter {
           ],
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -121,7 +128,9 @@ class _MockNotificationAdapter implements HttpClientAdapter {
       return ResponseBody.fromString(
         jsonEncode({'status': 'ok', 'message': 'success'}),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 

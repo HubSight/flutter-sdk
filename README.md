@@ -533,6 +533,8 @@ For in-depth specifications and guidelines, refer to the [`doc/`](doc/) director
    Domain-driven architecture patterns, WebRTC lifecycle management, batching protocols, and error strategies.
 4. **[Authentication & Session Security Standards](doc/SECURITY_FOR_LOGIN.md)**:
    Two-factor authentication flows, SHA-256 hardware device fingerprinting, and real-time session revocation.
+5. **[Pub.dev Publishing Procedure (SOP)](doc/PUBLISHING.md)**:
+   Standard operating procedure for releasing versions to pub.dev via GitHub Actions OIDC and automated pre-flight checks.
 
 ---
 

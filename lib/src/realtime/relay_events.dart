@@ -41,7 +41,8 @@ class AIAlertEvent {
       title: json['title'] as String? ?? 'Cảnh báo mới',
       message: json['message'] as String?,
       thumbnailUrl: json['thumbnail_url'] as String?,
-      timestamp: DateTime.tryParse(json['timestamp'] as String? ?? '') ?? DateTime.now(),
+      timestamp: DateTime.tryParse(json['timestamp'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 }

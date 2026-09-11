@@ -101,7 +101,9 @@ class DeviceInfoCollector {
         model = mac.model;
         manufacturer = 'Apple';
         osVersion = '${mac.majorVersion}.${mac.minorVersion}';
-        fingerprint = sha256.convert(utf8.encode(mac.systemGUID ?? 'mac_default')).toString();
+        fingerprint = sha256
+            .convert(utf8.encode(mac.systemGUID ?? 'mac_default'))
+            .toString();
       } else if (Platform.isWindows) {
         final win = await _deviceInfo.windowsInfo;
         platformName = 'Windows';
@@ -117,7 +119,9 @@ class DeviceInfoCollector {
         model = linux.name;
         manufacturer = 'Linux';
         osVersion = linux.versionId ?? '';
-        fingerprint = sha256.convert(utf8.encode(linux.machineId ?? 'linux_default')).toString();
+        fingerprint = sha256
+            .convert(utf8.encode(linux.machineId ?? 'linux_default'))
+            .toString();
       }
     } catch (_) {
       platformName = Platform.operatingSystem;
@@ -127,7 +131,9 @@ class DeviceInfoCollector {
 
     final timezone = DateTime.now().timeZoneName;
     final locale = Platform.localeName;
-    final deviceLabel = '$manufacturer $model ($platformName $osVersion) • App v$appVersion'.trim();
+    final deviceLabel =
+        '$manufacturer $model ($platformName $osVersion) • App v$appVersion'
+            .trim();
 
     return HubSightDeviceMetadata(
       fingerprint: fingerprint,

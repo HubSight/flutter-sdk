@@ -13,7 +13,8 @@ class MockStorage extends HubSightSecureStorage {
   @override
   Future<String?> getRefreshToken() async => refreshToken;
   @override
-  Future<void> saveTokens({required String accessToken, String? refreshToken}) async {
+  Future<void> saveTokens(
+      {required String accessToken, String? refreshToken}) async {
     this.accessToken = accessToken;
     if (refreshToken != null) this.refreshToken = refreshToken;
   }
@@ -137,7 +138,9 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
             'pre_auth_token': 'pre_auth_tok_81726354',
           }),
           200,
-          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType]
+          },
         );
       }
 
@@ -155,7 +158,9 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
           },
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -174,7 +179,9 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
           },
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -193,7 +200,9 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
             },
           }),
           200,
-          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType]
+          },
         );
       }
 
@@ -206,7 +215,9 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
           'permissions': ['*'],
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -226,7 +237,9 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
           ],
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -235,7 +248,9 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
       return ResponseBody.fromString(
         jsonEncode({'status': 'ok', 'message': 'success'}),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 

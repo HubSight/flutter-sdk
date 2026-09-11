@@ -22,8 +22,10 @@ class SessionItem {
       clientId: json['client_id'] as String? ?? '',
       isPwa: json['is_pwa'] as bool? ?? false,
       isCurrent: json['is_current'] as bool? ?? false,
-      expiresAt: DateTime.tryParse(json['expires_at'] as String? ?? '') ?? DateTime.now(),
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      expiresAt: DateTime.tryParse(json['expires_at'] as String? ?? '') ??
+          DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 

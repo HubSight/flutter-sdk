@@ -84,9 +84,11 @@ class _HubSightWebRTCViewState extends State<HubSightWebRTCView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.redAccent, size: 36),
+                  const Icon(Icons.error_outline,
+                      color: Colors.redAccent, size: 36),
                   const SizedBox(height: 8),
-                  const Text('Lỗi kết nối WebRTC', style: TextStyle(color: Colors.white70)),
+                  const Text('Lỗi kết nối WebRTC',
+                      style: TextStyle(color: Colors.white70)),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: _startStream,
@@ -111,7 +113,8 @@ class _HubSightWebRTCViewState extends State<HubSightWebRTCView> {
     return Container(
       color: Colors.black,
       child: const Center(
-        child: Text('Đang đợi luồng video...', style: TextStyle(color: Colors.white54)),
+        child: Text('Đang đợi luồng video...',
+            style: TextStyle(color: Colors.white54)),
       ),
     );
   }

@@ -16,7 +16,8 @@ class MockStorage extends HubSightSecureStorage {
   Future<String?> getRefreshToken() async => refreshToken;
 
   @override
-  Future<void> saveTokens({required String accessToken, String? refreshToken}) async {
+  Future<void> saveTokens(
+      {required String accessToken, String? refreshToken}) async {
     this.accessToken = accessToken;
     if (refreshToken != null) this.refreshToken = refreshToken;
   }
@@ -65,11 +66,14 @@ void main() {
     test('injects X-API-Key and Bearer token into requests', () async {
       final res = await dio.get('/api/app/v1/profile');
       expect(res.statusCode, equals(200));
-      expect(res.requestOptions.headers['X-API-Key'], equals('test_api_key_123'));
-      expect(res.requestOptions.headers['Authorization'], equals('Bearer old_expired_token'));
+      expect(
+          res.requestOptions.headers['X-API-Key'], equals('test_api_key_123'));
+      expect(res.requestOptions.headers['Authorization'],
+          equals('Bearer old_expired_token'));
     });
 
-    test('intercepts 503 Kill-Switch and triggers onMaintenance callback', () async {
+    test('intercepts 503 Kill-Switch and triggers onMaintenance callback',
+        () async {
       try {
         await dio.get('/api/app/v1/killswitch-test');
         fail('Should throw MaintenanceException');
@@ -83,7 +87,9 @@ void main() {
       }
     });
 
-    test('Atomic 401 Token Refresh: handles 5 concurrent requests with only 1 refresh call', () async {
+    test(
+        'Atomic 401 Token Refresh: handles 5 concurrent requests with only 1 refresh call',
+        () async {
       // Set initial token to trigger 401 on the first attempt
       mockStorage.accessToken = 'expired_jwt_tok';
 
@@ -102,7 +108,8 @@ void main() {
       for (final res in results) {
         expect(res.statusCode, equals(200));
         // All replayed requests should now carry the new access token
-        expect(res.requestOptions.headers['Authorization'], equals('Bearer new_refreshed_token_xyz'));
+        expect(res.requestOptions.headers['Authorization'],
+            equals('Bearer new_refreshed_token_xyz'));
       }
 
       // Crucial requirement: only 1 refresh request was sent to the server!
@@ -113,7 +120,8 @@ void main() {
 
     test('triggers onSessionExpired when refresh token fails', () async {
       mockStorage.accessToken = 'expired_jwt_tok';
-      mockStorage.refreshToken = 'invalid_refresh_token'; // will trigger 401 on refresh
+      mockStorage.refreshToken =
+          'invalid_refresh_token'; // will trigger 401 on refresh
 
       try {
         await dio.get('/api/app/v1/cameras');
@@ -174,7 +182,9 @@ class _MockHttpClientAdapter implements HttpClientAdapter {
         return ResponseBody.fromString(
           jsonEncode({'error': 'invalid refresh token'}),
           401,
-          headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType]
+          },
         );
       }
 
@@ -186,7 +196,9 @@ class _MockHttpClientAdapter implements HttpClientAdapter {
           'expires_in': 3600,
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -196,7 +208,9 @@ class _MockHttpClientAdapter implements HttpClientAdapter {
       return ResponseBody.fromString(
         jsonEncode({'error': 'Unauthorized', 'code': 'TOKEN_EXPIRED'}),
         401,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -204,7 +218,9 @@ class _MockHttpClientAdapter implements HttpClientAdapter {
     return ResponseBody.fromString(
       jsonEncode({'status': 'ok', 'data': 'mock_data'}),
       200,
-      headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType]
+      },
     );
   }
 

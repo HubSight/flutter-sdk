@@ -31,8 +31,10 @@ class HubSightNotificationService {
       if (isRead != null) 'is_read': isRead.toString(),
     };
 
-    final data = await _client.get(Endpoints.notifications, queryParameters: query);
-    return NotificationListResponse.fromJson(Map<String, dynamic>.from(data as Map));
+    final data =
+        await _client.get(Endpoints.notifications, queryParameters: query);
+    return NotificationListResponse.fromJson(
+        Map<String, dynamic>.from(data as Map));
   }
 
   /// Mark a single notification as read.

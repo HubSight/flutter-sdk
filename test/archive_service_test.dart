@@ -61,7 +61,8 @@ void main() {
       expect(seg.id, equals('rec_01J8G92'));
       expect(seg.durationSeconds, equals(300));
       expect(seg.sizeBytes, equals(15428900));
-      expect(seg.thumbnailUrl, equals('/api/app/v1/archive/rec_01J8G92/thumbnail'));
+      expect(seg.thumbnailUrl,
+          equals('/api/app/v1/archive/rec_01J8G92/thumbnail'));
     });
 
     test('getPlayStream returns direct presigned MP4 stream URL', () async {
@@ -99,7 +100,9 @@ class _MockArchiveAdapter implements HttpClientAdapter {
           ],
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -121,7 +124,9 @@ class _MockArchiveAdapter implements HttpClientAdapter {
           ],
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -130,13 +135,16 @@ class _MockArchiveAdapter implements HttpClientAdapter {
         jsonEncode({
           'status': 'ok',
           'recording_id': 'rec_01J8G92',
-          'stream_url': 'https://dl.learncurv.space/bucket-cctv/recordings/08-00-00.mp4',
+          'stream_url':
+              'https://dl.learncurv.space/bucket-cctv/recordings/08-00-00.mp4',
           'duration_seconds': 300,
           'size_bytes': 15428900,
           'format': 'mp4',
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 

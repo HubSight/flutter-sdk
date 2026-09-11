@@ -81,7 +81,8 @@ class HubSightApiClient {
     Options? options,
   }) async {
     return _wrapRequest(
-      () => _dio.post(path, data: data, queryParameters: queryParameters, options: options),
+      () => _dio.post(path,
+          data: data, queryParameters: queryParameters, options: options),
     );
   }
 
@@ -92,7 +93,8 @@ class HubSightApiClient {
     Options? options,
   }) async {
     return _wrapRequest(
-      () => _dio.put(path, data: data, queryParameters: queryParameters, options: options),
+      () => _dio.put(path,
+          data: data, queryParameters: queryParameters, options: options),
     );
   }
 
@@ -103,7 +105,8 @@ class HubSightApiClient {
     Options? options,
   }) async {
     return _wrapRequest(
-      () => _dio.patch(path, data: data, queryParameters: queryParameters, options: options),
+      () => _dio.patch(path,
+          data: data, queryParameters: queryParameters, options: options),
     );
   }
 
@@ -114,7 +117,8 @@ class HubSightApiClient {
     Options? options,
   }) async {
     return _wrapRequest(
-      () => _dio.delete(path, data: data, queryParameters: queryParameters, options: options),
+      () => _dio.delete(path,
+          data: data, queryParameters: queryParameters, options: options),
     );
   }
 

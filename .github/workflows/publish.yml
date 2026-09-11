@@ -1,0 +1,50 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+
+permissions:
+  id-token: write # Required for OIDC authentication with pub.dev
+
+jobs:
+  publish:
+    name: Publish Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify code formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Run static analysis
+        run: dart analyze --fatal-infos
+
+      - name: Run unit test suite
+        run: flutter test
+
+      - name: Pre-publish validation (dry-run)
+        run: flutter pub publish --dry-run
+
+      - name: Publish to pub.dev
+        run: dart pub publish --force

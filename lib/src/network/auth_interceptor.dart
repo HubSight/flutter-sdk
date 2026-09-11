@@ -58,7 +58,8 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
   }
 
   @override
-  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
+  Future<void> onError(
+      DioException err, ErrorInterceptorHandler handler) async {
     final response = err.response;
 
     // 1. Kill-Switch Handling (HTTP 503)
@@ -179,7 +180,8 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
 
         if (refreshRes.statusCode == 200 && refreshRes.data != null) {
           final data = Map<String, dynamic>.from(refreshRes.data as Map);
-          final newAccessToken = (data['access_token'] ?? data['token']) as String?;
+          final newAccessToken =
+              (data['access_token'] ?? data['token']) as String?;
           final newRefreshToken = (data['refresh_token']) as String?;
 
           if (newAccessToken != null && newAccessToken.isNotEmpty) {
@@ -196,7 +198,8 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
             _isRefreshing = false;
 
             // Replay the original failed request
-            err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+            err.requestOptions.headers['Authorization'] =
+                'Bearer $newAccessToken';
             final cloneReq = await _dio.fetch(err.requestOptions);
             return handler.resolve(cloneReq);
           }

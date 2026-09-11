@@ -22,8 +22,10 @@ class ArchiveSegment {
     return ArchiveSegment(
       id: json['id'] as String? ?? '',
       cameraId: json['camera_id'] as String? ?? '',
-      startAt: DateTime.tryParse(json['start_at'] as String? ?? '') ?? DateTime.now(),
-      endAt: DateTime.tryParse(json['end_at'] as String? ?? '') ?? DateTime.now(),
+      startAt: DateTime.tryParse(json['start_at'] as String? ?? '') ??
+          DateTime.now(),
+      endAt:
+          DateTime.tryParse(json['end_at'] as String? ?? '') ?? DateTime.now(),
       durationSeconds: json['duration_seconds'] as int? ?? 0,
       sizeBytes: (json['size_bytes'] as num?)?.toInt() ?? 0,
       thumbnailUrl: json['thumbnail_url'] as String?,

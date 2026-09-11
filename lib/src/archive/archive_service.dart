@@ -8,7 +8,8 @@ import 'models/play_stream.dart';
 class HubSightArchiveService {
   final HubSightApiClient _client;
 
-  HubSightArchiveService({required HubSightApiClient client}) : _client = client;
+  HubSightArchiveService({required HubSightApiClient client})
+      : _client = client;
 
   /// Retrieve available recording days for a given camera in a specific year and month.
   Future<ArchiveCalendar> getCalendar({
@@ -41,7 +42,8 @@ class HubSightArchiveService {
     );
     final segmentsRaw = (data as Map)['segments'] as List? ?? [];
     return segmentsRaw
-        .map((e) => ArchiveSegment.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map(
+            (e) => ArchiveSegment.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
 

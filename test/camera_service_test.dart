@@ -27,10 +27,12 @@ void main() {
         customDio: dio,
       );
 
-      cameraService = HubSightCameraService(client: client, storage: mockStorage);
+      cameraService =
+          HubSightCameraService(client: client, storage: mockStorage);
     });
 
-    test('listCameras returns correctly parsed list of Camera objects', () async {
+    test('listCameras returns correctly parsed list of Camera objects',
+        () async {
       final cameras = await cameraService.listCameras();
 
       expect(cameras.length, equals(2));
@@ -41,7 +43,8 @@ void main() {
       expect(cam1.isActive, isTrue);
       expect(cam1.isStopped, isFalse);
       expect(cam1.isStreaming, isTrue);
-      expect(cam1.thumbnailUrl, equals('/api/app/v1/cameras/cam_front_door/thumbnail'));
+      expect(cam1.thumbnailUrl,
+          equals('/api/app/v1/cameras/cam_front_door/thumbnail'));
       expect(cam1.streamName, equals('cam_cam_front_door_thumb'));
 
       final cam2 = cameras[1];
@@ -59,10 +62,14 @@ void main() {
       expect(camera.host, contains('192.168.1.100'));
     });
 
-    test('buildThumbnailUrl constructs authenticated URL with query parameters', () async {
+    test('buildThumbnailUrl constructs authenticated URL with query parameters',
+        () async {
       final url = await cameraService.buildThumbnailUrl('cam_front_door');
 
-      expect(url, startsWith('https://cctv.quoctran.space/api/app/v1/cameras/cam_front_door/thumbnail'));
+      expect(
+          url,
+          startsWith(
+              'https://cctv.quoctran.space/api/app/v1/cameras/cam_front_door/thumbnail'));
       expect(url, contains('api_key=test_api_key'));
       expect(url, contains('token=mock_jwt_token'));
       expect(url, contains('&_t='));
@@ -107,7 +114,9 @@ class _MockCameraAdapter implements HttpClientAdapter {
           ],
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 
@@ -124,7 +133,9 @@ class _MockCameraAdapter implements HttpClientAdapter {
           'stream_name': 'cam_cam_front_door_thumb',
         }),
         200,
-        headers: {Headers.contentTypeHeader: [Headers.jsonContentType]},
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
       );
     }
 

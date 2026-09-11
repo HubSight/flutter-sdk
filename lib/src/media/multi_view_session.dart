@@ -85,12 +85,15 @@ class MultiViewStreamSession {
         final answerSdp = resMap['sdp_answer'] as String?;
         final streamName = resMap['pool_stream_name'] as String?;
 
-        if (camId != null && answerSdp != null && _activeConnections.containsKey(camId)) {
+        if (camId != null &&
+            answerSdp != null &&
+            _activeConnections.containsKey(camId)) {
           if (streamName != null) {
             _streamNames[camId] = streamName;
           }
           final pc = _activeConnections[camId]!;
-          await pc.setRemoteDescription(RTCSessionDescription(answerSdp, 'answer'));
+          await pc
+              .setRemoteDescription(RTCSessionDescription(answerSdp, 'answer'));
         }
       }
 

@@ -27,7 +27,8 @@ class HubSightCameraThumbnail extends StatefulWidget {
   });
 
   @override
-  State<HubSightCameraThumbnail> createState() => _HubSightCameraThumbnailState();
+  State<HubSightCameraThumbnail> createState() =>
+      _HubSightCameraThumbnailState();
 }
 
 class _HubSightCameraThumbnailState extends State<HubSightCameraThumbnail> {
@@ -77,7 +78,8 @@ class _HubSightCameraThumbnailState extends State<HubSightCameraThumbnail> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.videocam_off_outlined, color: Colors.grey, size: 36),
+                  Icon(Icons.videocam_off_outlined,
+                      color: Colors.grey, size: 36),
                   SizedBox(height: 8),
                   Text(
                     'Camera tạm dừng',
@@ -101,7 +103,8 @@ class _HubSightCameraThumbnailState extends State<HubSightCameraThumbnail> {
             Container(
               color: Colors.black54,
               child: const Center(
-                child: Icon(Icons.broken_image_outlined, color: Colors.white30, size: 32),
+                child: Icon(Icons.broken_image_outlined,
+                    color: Colors.white30, size: 32),
               ),
             );
       },

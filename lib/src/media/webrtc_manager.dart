@@ -71,7 +71,8 @@ class HubSightWebRTCManager {
 
       _peerConnection!.onConnectionState = (RTCPeerConnectionState state) {
         if (state == RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
-            state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) {
+            state ==
+                RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) {
           _setStatus(StreamStatus.failed);
         }
       };

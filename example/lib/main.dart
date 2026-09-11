@@ -78,7 +78,8 @@ class EnrollmentScreen extends StatefulWidget {
 }
 
 class _EnrollmentScreenState extends State<EnrollmentScreen> {
-  final _gatewayCtrl = TextEditingController(text: 'https://cctv.quoctran.space');
+  final _gatewayCtrl =
+      TextEditingController(text: 'https://cctv.quoctran.space');
   final _apiKeyCtrl = TextEditingController(text: 'hs_mob_client_default');
   final _pinCtrl = TextEditingController(text: '123456');
 
@@ -97,7 +98,8 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
           gatewayUrl: _gatewayCtrl.text.trim(),
           apiBaseUrl: '${_gatewayCtrl.text.trim()}/api',
           relayWsUrl: 'wss://${Uri.parse(_gatewayCtrl.text.trim()).host}/relay',
-          webrtcBaseUrl: 'https://${Uri.parse(_gatewayCtrl.text.trim()).host}:8555',
+          webrtcBaseUrl:
+              'https://${Uri.parse(_gatewayCtrl.text.trim()).host}:8555',
         ),
         key: HubSightClientKey(
           clientId: _apiKeyCtrl.text.trim(),
@@ -117,13 +119,15 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
           final text = AppErrorLocalizer().resolve(m.code);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('[BẢO TRÌ] $text (Thử lại sau ${m.retryAfterSeconds}s)'),
+              content:
+                  Text('[BẢO TRÌ] $text (Thử lại sau ${m.retryAfterSeconds}s)'),
               backgroundColor: Colors.redAccent,
             ),
           );
         },
         onSessionExpired: () {
-          final text = AppErrorLocalizer().resolve(HubSightErrorCode.authSessionExpired);
+          final text =
+              AppErrorLocalizer().resolve(HubSightErrorCode.authSessionExpired);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(text),
@@ -156,7 +160,8 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.security_rounded, size: 64, color: Colors.blueAccent),
+                const Icon(Icons.security_rounded,
+                    size: 64, color: Colors.blueAccent),
                 const SizedBox(height: 16),
                 const Text(
                   'Thiết lập Cấu hình Ứng dụng',
@@ -200,12 +205,14 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+                  Text(_error!,
+                      style: const TextStyle(color: Colors.redAccent)),
                 ],
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _initWithPreset,
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                  style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: _isLoading
                       ? const SizedBox(
                           width: 20,
@@ -336,12 +343,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+                  Text(_error!,
+                      style: const TextStyle(color: Colors.redAccent)),
                 ],
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                  style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14)),
                   child: _isLoading
                       ? const SizedBox(
                           width: 20,
@@ -426,7 +435,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Text(
                       '$_unreadCount',
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -504,20 +514,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   right: 0,
                   child: Container(
                     color: Colors.black54,
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: Text(
                             cam.name,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w600),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Icon(
                           cam.isStreaming ? Icons.circle : Icons.stop_circle,
-                          color: cam.isStreaming ? Colors.greenAccent : Colors.redAccent,
+                          color: cam.isStreaming
+                              ? Colors.greenAccent
+                              : Colors.redAccent,
                           size: 10,
                         ),
                       ],
@@ -533,9 +547,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMultiViewGrid() {
-    final activeIds = _cameras.where((c) => c.isStreaming).map((c) => c.id).take(4).toList();
+    final activeIds =
+        _cameras.where((c) => c.isStreaming).map((c) => c.id).take(4).toList();
     if (activeIds.isEmpty) {
-      return const Center(child: Text('Không có camera nào đang hoạt động để xem multi-view.'));
+      return const Center(
+          child: Text('Không có camera nào đang hoạt động để xem multi-view.'));
     }
 
     final session = widget.sdk.createMultiViewSession();

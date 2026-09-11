@@ -20,7 +20,8 @@ api_base_url: "https://cctv.quoctran.space/api"
 relay_ws_url: "wss://cctv.quoctran.space/relay"
 webrtc_base_url: "https://cctv.quoctran.space:8555"
 ''';
-      final urlsFile = ArchiveFile('urls.yml', urlsContent.length, utf8.encode(urlsContent));
+      final urlsFile =
+          ArchiveFile('urls.yml', urlsContent.length, utf8.encode(urlsContent));
       archive.addFile(urlsFile);
 
       const keyContent = '''
@@ -31,7 +32,8 @@ allowed_scopes:
   - "cameras:view"
   - "playback:view"
 ''';
-      final keyFile = ArchiveFile('key.yml', keyContent.length, utf8.encode(keyContent));
+      final keyFile =
+          ArchiveFile('key.yml', keyContent.length, utf8.encode(keyContent));
       archive.addFile(keyFile);
 
       const metaContent = '''
@@ -41,7 +43,8 @@ name: "Test Config HQ"
 description: "Cấu hình thử nghiệm"
 created_by: "admin"
 ''';
-      final metaFile = ArchiveFile('metadata.yml', metaContent.length, utf8.encode(metaContent));
+      final metaFile = ArchiveFile(
+          'metadata.yml', metaContent.length, utf8.encode(metaContent));
       archive.addFile(metaFile);
 
       final zipBytes = Uint8List.fromList(ZipEncoder().encode(archive)!);
@@ -63,7 +66,8 @@ created_by: "admin"
       );
 
       // Encrypt with AES-256-GCM and AAD
-      final magicHeader = Uint8List.fromList([0x48, 0x53, 0x43, 0x46, 0x47, 0x01]);
+      final magicHeader =
+          Uint8List.fromList([0x48, 0x53, 0x43, 0x46, 0x47, 0x01]);
       final aesGcm = AesGcm.with256bits();
       final secretBox = await aesGcm.encrypt(
         zipBytes,
@@ -99,7 +103,9 @@ created_by: "admin"
       expect(config.apiKey, equals('hs_mob_test_client'));
     });
 
-    test('fails decryption when wrong PIN is supplied with configDecryptionFailed code', () async {
+    test(
+        'fails decryption when wrong PIN is supplied with configDecryptionFailed code',
+        () async {
       try {
         await HscfgDecoder.decrypt(
           fileBytes: validHscfgBytes,
@@ -113,7 +119,8 @@ created_by: "admin"
       }
     });
 
-    test('fails when PIN is not 6 digits with configInvalidPinFormat code', () async {
+    test('fails when PIN is not 6 digits with configInvalidPinFormat code',
+        () async {
       try {
         await HscfgDecoder.decrypt(
           fileBytes: validHscfgBytes,
@@ -126,7 +133,8 @@ created_by: "admin"
       }
     });
 
-    test('fails when magic header is invalid with configInvalidHeader code', () async {
+    test('fails when magic header is invalid with configInvalidHeader code',
+        () async {
       final corrupted = Uint8List.fromList(validHscfgBytes);
       corrupted[0] = 0x00; // corrupt magic header
 
