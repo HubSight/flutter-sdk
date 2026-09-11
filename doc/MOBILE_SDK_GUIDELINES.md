@@ -247,7 +247,7 @@ When an administrator disables mobile client access (`app_api_enabled = false`):
 ## 4. Recommended Mobile SDK Architecture Directory Layout
 
 ```
-hubsight_mobile_sdk/
+hubsight_sdk/
 ├── lib/ (or src/)
 │   ├── hubsight_sdk.dart              # Main SDK Entrypoint & Facade
 │   ├── config/

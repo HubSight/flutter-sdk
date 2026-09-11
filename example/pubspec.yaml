@@ -1,5 +1,5 @@
 name: hubsight_sdk_example
-description: "Example demo app for hubsight_mobile_sdk."
+description: "Example demo app for hubsight_sdk."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  hubsight_mobile_sdk:
+  hubsight_sdk:
     path: ../
 
 dev_dependencies:

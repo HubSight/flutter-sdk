@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hubsight_mobile_sdk/hubsight_sdk.dart';
+import 'package:hubsight_sdk/hubsight_sdk.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

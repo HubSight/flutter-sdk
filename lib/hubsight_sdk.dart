@@ -1,4 +1,4 @@
-library hubsight_mobile_sdk;
+library hubsight_sdk;
 
 import 'dart:async';
 import 'dart:typed_data';

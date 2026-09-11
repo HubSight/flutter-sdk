@@ -516,7 +516,7 @@ X-Client-Type: mobile_ios
 }
 ```
 
-See [`docs/SECURITY_FOR_LOGIN.md`](./SECURITY_FOR_LOGIN.md) for full contract details.
+See [`doc/SECURITY_FOR_LOGIN.md`](./SECURITY_FOR_LOGIN.md) for full contract details.
 
 ---
 

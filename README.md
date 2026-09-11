@@ -51,7 +51,7 @@ flowchart TB
         Localizer["AppErrorLocalizer (i18n / l10n)"]
     end
 
-    subgraph SDK["HubSight Mobile SDK (hubsight_mobile_sdk)"]
+    subgraph SDK["HubSight SDK (hubsight_sdk)"]
         Facade["HubSightSDK (Entrypoint & Master Facade)"]
         
         subgraph CoreServices["Domain Services"]
@@ -149,15 +149,15 @@ Ensure required network and audio permissions are declared:
 
 ## 4. Installation
 
-Add `hubsight_mobile_sdk` to your `pubspec.yaml`:
+Add `hubsight_sdk` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
-  hubsight_mobile_sdk:
+  hubsight_sdk:
     git:
-      url: https://github.com/hubsight/flutter-sdk.git
+      url: https://github.com/HubSight/flutter-sdk.git
       ref: main
 ```
 
@@ -165,7 +165,7 @@ Or reference locally in a monorepo workspace:
 
 ```yaml
 dependencies:
-  hubsight_mobile_sdk:
+  hubsight_sdk:
     path: ../flutter-sdk
 ```
 
@@ -184,7 +184,7 @@ Download the `.hscfg` container bytes from the QR code presigned URL or Admin Po
 
 ```dart
 import 'dart:typed_data';
-import 'package:hubsight_mobile_sdk/hubsight_sdk.dart';
+import 'package:hubsight_sdk/hubsight_sdk.dart';
 
 // 1. Load container bytes and 6-digit PIN provided by admin
 final Uint8List hscfgBytes = await loadConfigFileBytes();
@@ -486,7 +486,7 @@ try {
 
 ```
 hubsight-flutter-sdk/
-├── docs/                               # Detailed technical specifications
+├── doc/                                # Detailed technical specifications
 │   ├── APP_API_SPECIFICATION.md        # REST API & Socket Gateway specification
 │   ├── APP_CONFIG_SPECIFICATION.md     # .hscfg container encryption specification
 │   ├── MOBILE_SDK_GUIDELINES.md        # SDK architecture & best practices
@@ -523,15 +523,15 @@ hubsight-flutter-sdk/
 
 ## 8. Technical Documentation Sitemap
 
-For in-depth specifications and guidelines, refer to the [`docs/`](docs/) directory:
+For in-depth specifications and guidelines, refer to the [`doc/`](doc/) directory:
 
-1. **[Mobile API v1 Specification](docs/APP_API_SPECIFICATION.md)**:
+1. **[Mobile API v1 Specification](doc/APP_API_SPECIFICATION.md)**:
    Full specification of Gateway `:8088` endpoints, payload formats, authentication headers, and error contracts.
-2. **[Configuration Container Specification (`.hscfg`)](docs/APP_CONFIG_SPECIFICATION.md)**:
+2. **[Configuration Container Specification (`.hscfg`)](doc/APP_CONFIG_SPECIFICATION.md)**:
    Details on Argon2id key derivation, AES-256-GCM encryption, Ed25519 digital signatures, and binary layouts.
-3. **[Mobile SDK Architecture Guidelines](docs/MOBILE_SDK_GUIDELINES.md)**:
+3. **[Mobile SDK Architecture Guidelines](doc/MOBILE_SDK_GUIDELINES.md)**:
    Domain-driven architecture patterns, WebRTC lifecycle management, batching protocols, and error strategies.
-4. **[Authentication & Session Security Standards](docs/SECURITY_FOR_LOGIN.md)**:
+4. **[Authentication & Session Security Standards](doc/SECURITY_FOR_LOGIN.md)**:
    Two-factor authentication flows, SHA-256 hardware device fingerprinting, and real-time session revocation.
 
 ---
