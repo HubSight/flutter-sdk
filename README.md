@@ -1,5 +1,7 @@
 # HubSight Mobile SDK for Flutter
 
+[![Pub Version](https://img.shields.io/pub/v/hubsight_sdk?logo=dart&logoColor=white)](https://pub.dev/packages/hubsight_sdk)
+[![Pub Points](https://img.shields.io/pub/points/hubsight_sdk?color=2E8B57)](https://pub.dev/packages/hubsight_sdk/score)
 [![Flutter Version](https://img.shields.io/badge/Flutter-%3E%3D3.10.0-02569B?logo=flutter)](https://flutter.dev)
 [![Dart Version](https://img.shields.io/badge/Dart-%3E%3D3.0.0-0175C2?logo=dart)](https://dart.dev)
 [![Platforms](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20macOS%20%7C%20Windows%20%7C%20Linux-blue)](https://flutter.dev)
@@ -149,20 +151,35 @@ Ensure required network and audio permissions are declared:
 
 ## 4. Installation
 
-Add `hubsight_sdk` to your `pubspec.yaml`:
+### From [pub.dev](https://pub.dev/packages/hubsight_sdk) (Recommended)
+
+Add `hubsight_sdk` to your Flutter project via terminal:
+
+```bash
+flutter pub add hubsight_sdk
+```
+
+Or manually declare it in your `pubspec.yaml`:
 
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
+  hubsight_sdk: ^1.0.0
+```
+
+### Alternative Sources
+
+From GitHub:
+```yaml
+dependencies:
   hubsight_sdk:
     git:
       url: https://github.com/HubSight/flutter-sdk.git
-      ref: main
+      ref: v1.0.0
 ```
 
-Or reference locally in a monorepo workspace:
-
+Or locally in a monorepo workspace:
 ```yaml
 dependencies:
   hubsight_sdk:
