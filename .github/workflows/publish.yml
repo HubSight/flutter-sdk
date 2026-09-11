@@ -19,12 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -42,6 +36,11 @@ jobs:
 
       - name: Run unit test suite
         run: flutter test
+
+      - name: Ensure clean git state
+        run: |
+          git status
+          git checkout -- .
 
       - name: Pre-publish validation (dry-run)
         run: flutter pub publish --dry-run
