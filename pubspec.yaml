@@ -1,0 +1,30 @@
+name: hubsight_mobile_sdk
+description: "Standard Flutter SDK for HubSight CCTV Surveillance Platform. Provides Zero-Config enrollment (.hscfg), Atomic 401 token refresh, Multi-View WebRTC batching, and Real-time Thumbnails."
+version: 1.0.0
+homepage: https://github.com/hubsight/flutter-sdk
+repository: https://github.com/hubsight/flutter-sdk
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.7.0
+  cryptography: ^2.7.0
+  archive: ^3.6.1
+  yaml: ^3.1.2
+  flutter_secure_storage: ^9.2.2
+  flutter_webrtc: ^0.12.5
+  socket_io_client: ^3.0.2
+  crypto: ^3.0.5
+  device_info_plus: ^10.1.2
+  package_info_plus: ^8.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:

@@ -1,0 +1,197 @@
+import 'dart:async';
+import '../network/api_client.dart';
+import '../network/endpoints.dart';
+import '../security/device_info_collector.dart';
+import '../security/secure_storage.dart';
+import 'models/auth_response.dart';
+import 'models/session_item.dart';
+import 'models/user_profile.dart';
+
+/// Manager for authentication lifecycle, session tracking, and user profile.
+class HubSightAuthManager {
+  final HubSightApiClient _client;
+  final HubSightSecureStorage _storage;
+  final DeviceInfoCollector _deviceCollector;
+
+  UserProfile? _currentUser;
+  final StreamController<UserProfile?> _userStreamController =
+      StreamController<UserProfile?>.broadcast();
+
+  HubSightAuthManager({
+    required HubSightApiClient client,
+    required HubSightSecureStorage storage,
+    DeviceInfoCollector? deviceCollector,
+  })  : _client = client,
+        _storage = storage,
+        _deviceCollector = deviceCollector ?? DeviceInfoCollector();
+
+  Stream<UserProfile?> get onUserChanged => _userStreamController.stream;
+  UserProfile? get currentUser => _currentUser;
+
+  /// Check if user has an active session in local storage.
+  Future<bool> get isAuthenticated async {
+    final token = await _storage.getAccessToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  /// Primary login with username, password, and automatic device fingerprinting.
+  Future<AuthResult> login({
+    required String username,
+    required String password,
+  }) async {
+    final device = await _deviceCollector.collect();
+    _client.updateDeviceMetadata(device);
+
+    final payload = {
+      'username': username,
+      'password': password,
+      'device_name': device.deviceLabel,
+      'platform': device.clientType,
+      'device_id': device.fingerprint,
+      'device_info': device.toMap(),
+    };
+
+    final data = await _client.post(Endpoints.authLogin, data: payload);
+    final result = AuthResult.fromJson(Map<String, dynamic>.from(data as Map));
+
+    if (result.isSuccess && result.accessToken != null) {
+      await _storage.saveTokens(
+        accessToken: result.accessToken!,
+        refreshToken: result.refreshToken,
+      );
+      _currentUser = result.user;
+      _userStreamController.add(_currentUser);
+    }
+
+    return result;
+  }
+
+  /// Verify TOTP code or recovery code during two-factor authentication challenge.
+  Future<AuthResult> verify2FA({
+    required String preAuthToken,
+    required String code,
+    String? recoveryCode,
+  }) async {
+    final payload = {
+      'pre_auth_token': preAuthToken,
+      'code': code,
+      if (recoveryCode != null && recoveryCode.isNotEmpty)
+        'recovery_code': recoveryCode,
+    };
+
+    final data = await _client.post(Endpoints.auth2faVerify, data: payload);
+    final result = AuthResult.fromJson(Map<String, dynamic>.from(data as Map));
+
+    if (result.isSuccess && result.accessToken != null) {
+      await _storage.saveTokens(
+        accessToken: result.accessToken!,
+        refreshToken: result.refreshToken,
+      );
+      _currentUser = result.user;
+      _userStreamController.add(_currentUser);
+    }
+
+    return result;
+  }
+
+  /// Manually refresh access token using current refresh token.
+  Future<bool> refreshToken() async {
+    final refreshToken = await _storage.getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) return false;
+
+    final data = await _client.post(
+      Endpoints.authRefresh,
+      data: {'refresh_token': refreshToken},
+    );
+
+    final resMap = Map<String, dynamic>.from(data as Map);
+    final newAccess = (resMap['access_token'] ?? resMap['token']) as String?;
+    final newRefresh = resMap['refresh_token'] as String?;
+
+    if (newAccess != null && newAccess.isNotEmpty) {
+      await _storage.saveTokens(
+        accessToken: newAccess,
+        refreshToken: newRefresh ?? refreshToken,
+      );
+      return true;
+    }
+    return false;
+  }
+
+  /// Change account password.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _client.post(
+      Endpoints.authChangePassword,
+      data: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+      },
+    );
+  }
+
+  /// Sign out current session and clear stored tokens.
+  Future<void> logout() async {
+    try {
+      await _client.post(Endpoints.authLogout);
+    } catch (_) {
+      // Best effort remote revocation
+    } finally {
+      await _storage.clearTokens();
+      _currentUser = null;
+      _userStreamController.add(null);
+    }
+  }
+
+  /// Fetch full user profile and permissions from server.
+  Future<UserProfile> getProfile() async {
+    final data = await _client.get(Endpoints.profile);
+    _currentUser = UserProfile.fromJson(Map<String, dynamic>.from(data as Map));
+    _userStreamController.add(_currentUser);
+    return _currentUser!;
+  }
+
+  /// Update profile preferences (full name, locale, timezone, theme, push preferences).
+  Future<UserProfile> updateProfile({
+    String? fullName,
+    String? locale,
+    String? timezone,
+    String? theme,
+    Map<String, bool>? pushPreferences,
+  }) async {
+    final payload = <String, dynamic>{
+      if (fullName != null) 'full_name': fullName,
+      if (locale != null) 'locale': locale,
+      if (timezone != null) 'timezone': timezone,
+      if (theme != null) 'theme': theme,
+      if (pushPreferences != null) 'push_preferences': pushPreferences,
+    };
+
+    final data = await _client.patch(Endpoints.profile, data: payload);
+    final userMap = (data as Map)['user'] as Map<String, dynamic>? ??
+        Map<String, dynamic>.from(data);
+    _currentUser = UserProfile.fromJson(userMap);
+    _userStreamController.add(_currentUser);
+    return _currentUser!;
+  }
+
+  /// List active sessions across all devices for this account.
+  Future<List<SessionItem>> listSessions() async {
+    final data = await _client.get(Endpoints.profileSessions);
+    final list = (data as Map)['sessions'] as List? ?? [];
+    return list
+        .map((e) => SessionItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
+  /// Remotely revoke a specific session.
+  Future<void> revokeSession(String sessionId) async {
+    await _client.delete(Endpoints.profileSessionRevoke(sessionId));
+  }
+
+  void dispose() {
+    _userStreamController.close();
+  }
+}
