@@ -24,8 +24,9 @@ class HubSightUrls {
       apiBaseUrl: (map['api_base_url'] as String? ?? '').trim(),
       relayWsUrl: (map['relay_ws_url'] as String? ?? '').trim(),
       webrtcBaseUrl: (map['webrtc_base_url'] as String? ?? '').trim(),
-      webrtcSignalingUrl:
-          signaling.isNotEmpty ? signaling : (gw.isNotEmpty ? '$gw/webrtc' : ''),
+      webrtcSignalingUrl: signaling.isNotEmpty
+          ? signaling
+          : (gw.isNotEmpty ? '$gw/webrtc' : ''),
       webrtcMediaPort: map['webrtc_media_port'] is int
           ? map['webrtc_media_port'] as int
           : int.tryParse(map['webrtc_media_port']?.toString() ?? '') ?? 8555,
@@ -66,8 +67,7 @@ class HubSightClientKey {
       scopes = scopesRaw.map((e) => e.toString()).toList();
     }
     final apiKeyVal = (map['api_key'] as String? ?? '').trim();
-    final clientSecretVal =
-        (map['client_secret'] as String? ?? '').trim();
+    final clientSecretVal = (map['client_secret'] as String? ?? '').trim();
     return HubSightClientKey(
       clientId: (map['client_id'] as String? ?? '').trim(),
       clientSecret: clientSecretVal,

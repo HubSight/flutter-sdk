@@ -16,10 +16,14 @@ class Endpoints {
 
   // Passkeys / FIDO2 (WebAuthn)
   static const String authPasskeys = '/api/auth/passkeys';
-  static const String authPasskeyLoginOptions = '/api/auth/passkeys/login/options';
-  static const String authPasskeyLoginVerify = '/api/auth/passkeys/login/verify';
-  static const String authPasskeyRegisterOptions = '/api/auth/passkeys/register/options';
-  static const String authPasskeyRegisterVerify = '/api/auth/passkeys/register/verify';
+  static const String authPasskeyLoginOptions =
+      '/api/auth/passkeys/login/options';
+  static const String authPasskeyLoginVerify =
+      '/api/auth/passkeys/login/verify';
+  static const String authPasskeyRegisterOptions =
+      '/api/auth/passkeys/register/options';
+  static const String authPasskeyRegisterVerify =
+      '/api/auth/passkeys/register/verify';
   static String authPasskeyItem(String id) => '/api/auth/passkeys/$id';
 
   // Profile & Sessions

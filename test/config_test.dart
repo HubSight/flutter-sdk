@@ -88,8 +88,10 @@ created_by: "admin"
       validHscfgBytes = builder.toBytes();
 
       // Generate 32-byte salt (HubSight server standard) and Nonce (12 bytes)
-      final salt32 = Uint8List.fromList(List.generate(32, (i) => (i * 7) % 256));
-      final nonce32 = Uint8List.fromList(List.generate(12, (i) => (i * 13) % 256));
+      final salt32 =
+          Uint8List.fromList(List.generate(32, (i) => (i * 7) % 256));
+      final nonce32 =
+          Uint8List.fromList(List.generate(12, (i) => (i * 13) % 256));
       final secretKey32 = await kdf.deriveKey(
         secretKey: SecretKey(utf8.encode(testPin)),
         nonce: salt32,
@@ -109,7 +111,9 @@ created_by: "admin"
       valid32ByteHscfgBytes = builder32.toBytes();
     });
 
-    test('decrypts valid .hscfg container with correct PIN (16-byte salt fallback)', () async {
+    test(
+        'decrypts valid .hscfg container with correct PIN (16-byte salt fallback)',
+        () async {
       final config = await HscfgDecoder.decrypt(
         fileBytes: validHscfgBytes,
         pin6Digits: testPin,
@@ -125,7 +129,8 @@ created_by: "admin"
       expect(config.apiKey, equals('hs_mob_test_client'));
     });
 
-    test('decrypts valid 32-byte salt container (HubSight server standard)', () async {
+    test('decrypts valid 32-byte salt container (HubSight server standard)',
+        () async {
       final config = await HscfgDecoder.decrypt(
         fileBytes: valid32ByteHscfgBytes,
         pin6Digits: testPin,
