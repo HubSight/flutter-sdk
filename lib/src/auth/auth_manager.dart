@@ -34,12 +34,25 @@ class HubSightAuthManager {
     return token != null && token.isNotEmpty;
   }
 
-  /// Primary login with username, password, and automatic device fingerprinting.
+  /// Primary login with username, password, optional geolocation, and automatic device fingerprinting.
   Future<AuthResult> login({
     required String username,
     required String password,
+    double? latitude,
+    double? longitude,
+    double? accuracy,
+    String? geoCity,
+    String? geoCountry,
+    String? geoRegion,
   }) async {
-    final device = await _deviceCollector.collect();
+    final device = await _deviceCollector.collect(
+      latitude: latitude,
+      longitude: longitude,
+      accuracy: accuracy,
+      geoCity: geoCity,
+      geoCountry: geoCountry,
+      geoRegion: geoRegion,
+    );
     _client.updateDeviceMetadata(device);
 
     final payload = {
@@ -71,12 +84,29 @@ class HubSightAuthManager {
     required String preAuthToken,
     required String code,
     String? recoveryCode,
+    double? latitude,
+    double? longitude,
+    double? accuracy,
+    String? geoCity,
+    String? geoCountry,
+    String? geoRegion,
   }) async {
+    final device = await _deviceCollector.collect(
+      latitude: latitude,
+      longitude: longitude,
+      accuracy: accuracy,
+      geoCity: geoCity,
+      geoCountry: geoCountry,
+      geoRegion: geoRegion,
+    );
+    _client.updateDeviceMetadata(device);
+
     final payload = {
       'pre_auth_token': preAuthToken,
       'code': code,
       if (recoveryCode != null && recoveryCode.isNotEmpty)
         'recovery_code': recoveryCode,
+      'device_info': device.toMap(),
     };
 
     final data = await _client.post(Endpoints.auth2faVerify, data: payload);

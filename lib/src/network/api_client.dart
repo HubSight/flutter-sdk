@@ -53,6 +53,7 @@ class HubSightApiClient {
   Dio get rawDio => _dio;
   String get baseUrl => _baseUrl;
   String get apiKey => _apiKey;
+  HubSightDeviceMetadata? get deviceMetadata => _deviceMetadata;
 
   void updateConfig(HubSightAppConfig config) {
     _baseUrl = config.urls.gatewayUrl;

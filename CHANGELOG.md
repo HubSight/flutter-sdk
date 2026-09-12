@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.0 - 2026-09-12
+
+### Added
+- **Geolocation Support in Session Management & Device Metadata**:
+  - Added geolocation coordinates (`geoCity`, `geoCountry`, `geoRegion`, `geoLatitude`, `geoLongitude`, `geoAccuracy`) and device audit fields (`ipAddress`, `userAgent`, `deviceFingerprint`, `deviceLabel`, `clientType`, `isNewDevice`, `isActive`, `lastActiveAt`, `revokedAt`, `revokeReason`) to `SessionItem`.
+  - Extended `HubSightDeviceMetadata` and `DeviceInfoCollector.collect()` to support passing GPS / OS location (`latitude`, `longitude`, `accuracy`, `geoCity`, `geoCountry`, `geoRegion`).
+  - Updated `HubSightAuthManager.login()` and `HubSightAuthManager.verify2FA()` to accept optional geolocation parameters.
+  - Added public getter `deviceMetadata` on `HubSightApiClient`.
+
 ## 1.0.0 - 2026-09-11
 
 ### Added

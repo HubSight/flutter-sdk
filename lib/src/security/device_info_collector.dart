@@ -17,6 +17,14 @@ class HubSightDeviceMetadata {
   final String language;
   final String timezone;
 
+  // Geolocation fields
+  final double? latitude;
+  final double? longitude;
+  final double? accuracy;
+  final String? geoCity;
+  final String? geoCountry;
+  final String? geoRegion;
+
   const HubSightDeviceMetadata({
     required this.fingerprint,
     required this.deviceLabel,
@@ -28,6 +36,12 @@ class HubSightDeviceMetadata {
     required this.appVersion,
     required this.language,
     required this.timezone,
+    this.latitude,
+    this.longitude,
+    this.accuracy,
+    this.geoCity,
+    this.geoCountry,
+    this.geoRegion,
   });
 
   Map<String, dynamic> toMap() {
@@ -42,6 +56,12 @@ class HubSightDeviceMetadata {
       'app_version': appVersion,
       'language': language,
       'timezone': timezone,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (accuracy != null) 'accuracy': accuracy,
+      if (geoCity != null) 'geo_city': geoCity,
+      if (geoCountry != null) 'geo_country': geoCountry,
+      if (geoRegion != null) 'geo_region': geoRegion,
     };
   }
 
@@ -61,7 +81,14 @@ class DeviceInfoCollector {
   DeviceInfoCollector({DeviceInfoPlugin? deviceInfo})
       : _deviceInfo = deviceInfo ?? DeviceInfoPlugin();
 
-  Future<HubSightDeviceMetadata> collect() async {
+  Future<HubSightDeviceMetadata> collect({
+    double? latitude,
+    double? longitude,
+    double? accuracy,
+    String? geoCity,
+    String? geoCountry,
+    String? geoRegion,
+  }) async {
     String appVersion = '1.0.0';
     try {
       final pkg = await PackageInfo.fromPlatform();
@@ -146,6 +173,12 @@ class DeviceInfoCollector {
       appVersion: appVersion,
       language: locale,
       timezone: timezone,
+      latitude: latitude,
+      longitude: longitude,
+      accuracy: accuracy,
+      geoCity: geoCity,
+      geoCountry: geoCountry,
+      geoRegion: geoRegion,
     );
   }
 }

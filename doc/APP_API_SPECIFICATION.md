@@ -370,6 +370,49 @@ Ultra-lightweight endpoint for app badge updates:
 
 ---
 
+### 3.7. User Profile & Multi-Device Sessions
+
+#### `GET /api/app/v1/profile/sessions`
+Headers: `X-API-Key`, `Authorization: Bearer <token>`  
+Lists all active login sessions across devices for the authenticated user, including detailed device audit info and geolocation coordinates.
+
+Response `200 OK`:
+```json
+{
+  "status": "ok",
+  "sessions": [
+    {
+      "id": "sess_01J8G92AB...",
+      "client_id": "app_client_mobile",
+      "is_pwa": false,
+      "is_current": true,
+      "expires_at": "2026-09-18T10:00:00Z",
+      "created_at": "2026-09-11T10:00:00Z",
+      "geo_city": "Ho Chi Minh City",
+      "geo_country": "Vietnam",
+      "geo_region": "Ho Chi Minh",
+      "geo_latitude": 10.7769,
+      "geo_longitude": 106.7009,
+      "geo_accuracy": 15.0
+    }
+  ]
+}
+```
+
+#### `DELETE /api/app/v1/profile/sessions/:id`
+Headers: `X-API-Key`, `Authorization: Bearer <token>`  
+Remotely terminates and revokes a specific user session.
+
+Response `200 OK`:
+```json
+{
+  "status": "ok",
+  "message": "Thu hồi phiên đăng nhập thành công."
+}
+```
+
+---
+
 ## 4. Sample Client Implementation (Flutter / Dart)
 
 ```dart

@@ -103,7 +103,13 @@ To provide detailed session logging (`login_session` & `known_devices`), both We
     "app_version": "1.2.0",
     "screen_resolution": "1179x2556",
     "language": "en-US",
-    "timezone": "UTC"
+    "timezone": "UTC",
+    "latitude": 10.7769,
+    "longitude": 106.7009,
+    "accuracy": 15.0,
+    "geo_city": "Ho Chi Minh City",
+    "geo_country": "Vietnam",
+    "geo_region": "Ho Chi Minh"
   }
 }
 ```
@@ -123,6 +129,12 @@ To provide detailed session logging (`login_session` & `known_devices`), both We
 | `screen_resolution` | string | Screen display resolution | `1179x2556`, `1920x1080` |
 | `language` | string | System/client locale | `en-US`, `vi-VN` |
 | `timezone` | string | IANA timezone string | `UTC`, `Asia/Ho_Chi_Minh` |
+| `latitude` | number | (Optional) GPS / Device latitude | `10.7769` |
+| `longitude` | number | (Optional) GPS / Device longitude | `106.7009` |
+| `accuracy` | number | (Optional) Geolocation accuracy radius in meters | `15.0` |
+| `geo_city` | string | (Optional) Client-resolved city | `Ho Chi Minh City` |
+| `geo_country` | string | (Optional) Client-resolved country | `Vietnam` |
+| `geo_region` | string | (Optional) Client-resolved administrative region | `Ho Chi Minh` |
 
 #### 4.4.2. Dual HTTP Header Injection
 

@@ -104,6 +104,59 @@ void main() {
       expect(sessions.length, equals(1));
       expect(sessions[0].id, equals('sess_001'));
       expect(sessions[0].isCurrent, isTrue);
+      expect(sessions[0].geoCity, equals('Hue'));
+      expect(sessions[0].geoCountry, equals('Vietnam'));
+      expect(sessions[0].geoRegion, equals('Thua Thien Hue'));
+      expect(sessions[0].geoLatitude, equals(16.4637));
+      expect(sessions[0].geoLongitude, equals(107.5909));
+      expect(sessions[0].geoAccuracy, equals(15.0));
+      expect(sessions[0].ipAddress, equals('14.162.140.21'));
+      expect(sessions[0].deviceFingerprint, equals('fp_abc123'));
+      expect(sessions[0].deviceLabel, equals('iPhone 15 Pro'));
+      expect(sessions[0].clientType, equals('mobile_ios'));
+
+      final json = sessions[0].toJson();
+      expect(json['geo_city'], equals('Hue'));
+      expect(json['geo_latitude'], equals(16.4637));
+    });
+
+    test('login with geolocation attaches coordinates to device metadata',
+        () async {
+      final res = await authManager.login(
+        username: 'admin',
+        password: 'correct_password',
+        latitude: 10.7769,
+        longitude: 106.7009,
+        accuracy: 5.0,
+        geoCity: 'Ho Chi Minh City',
+        geoCountry: 'Vietnam',
+      );
+
+      expect(res.isSuccess, isTrue);
+      expect(client.deviceMetadata?.latitude, equals(10.7769));
+      expect(client.deviceMetadata?.longitude, equals(106.7009));
+      expect(client.deviceMetadata?.accuracy, equals(5.0));
+      expect(client.deviceMetadata?.geoCity, equals('Ho Chi Minh City'));
+      expect(client.deviceMetadata?.geoCountry, equals('Vietnam'));
+      expect(client.deviceMetadata?.toMap()['latitude'], equals(10.7769));
+      expect(client.deviceMetadata?.toMap()['geo_city'],
+          equals('Ho Chi Minh City'));
+    });
+
+    test('verify2FA with geolocation passes coordinates into device metadata',
+        () async {
+      final res = await authManager.verify2FA(
+        preAuthToken: 'pre_auth_tok_81726354',
+        code: '123456',
+        latitude: 21.0285,
+        longitude: 105.8542,
+        geoCity: 'Hanoi',
+      );
+
+      expect(res.isSuccess, isTrue);
+      expect(client.deviceMetadata?.latitude, equals(21.0285));
+      expect(client.deviceMetadata?.longitude, equals(105.8542));
+      expect(client.deviceMetadata?.geoCity, equals('Hanoi'));
     });
 
     test('revokeSession revokes session', () async {
@@ -233,6 +286,19 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
               'is_current': true,
               'expires_at': '2026-09-10T12:00:00Z',
               'created_at': '2026-09-09T12:00:00Z',
+              'geo_city': 'Hue',
+              'geo_country': 'Vietnam',
+              'geo_region': 'Thua Thien Hue',
+              'geo_latitude': 16.4637,
+              'geo_longitude': 107.5909,
+              'geo_accuracy': 15.0,
+              'ip_address': '14.162.140.21',
+              'user_agent': 'HubSightMobile/1.0',
+              'device_fingerprint': 'fp_abc123',
+              'device_label': 'iPhone 15 Pro',
+              'client_type': 'mobile_ios',
+              'is_new_device': false,
+              'is_active': true,
             }
           ],
         }),

@@ -5,7 +5,7 @@
 [![Flutter Version](https://img.shields.io/badge/Flutter-%3E%3D3.10.0-02569B?logo=flutter)](https://flutter.dev)
 [![Dart Version](https://img.shields.io/badge/Dart-%3E%3D3.0.0-0175C2?logo=dart)](https://dart.dev)
 [![Platforms](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20macOS%20%7C%20Windows%20%7C%20Linux-blue)](https://flutter.dev)
-[![Test Suite](https://img.shields.io/badge/Tests-29%20Passed-brightgreen)](test)
+[![Test Suite](https://img.shields.io/badge/Tests-31%20Passed-brightgreen)](test)
 [![Analysis](https://img.shields.io/badge/Analysis-Clean%20(0%20Issues)-success)](analysis_options.yaml)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -251,10 +251,13 @@ await sdk.initialize();
 Supports the full Mobile API v1 authentication lifecycle:
 
 ```dart
-// Step 1: Submit credentials (Hardware fingerprint headers attached automatically)
+// Step 1: Submit credentials (Hardware fingerprint & optional GPS coordinates attached)
 final loginResult = await sdk.auth.login(
   username: 'operator_01',
   password: 'Password@1234',
+  latitude: 10.7769, // Optional GPS latitude
+  longitude: 106.7009, // Optional GPS longitude
+  geoCity: 'Ho Chi Minh City', // Optional resolved city
 );
 
 if (loginResult.requires2FA) {
