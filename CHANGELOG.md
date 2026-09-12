@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.1 - 2026-09-13
+
+### Fixed
+- **Incorrect HTTP API Base URL**: `HubSightSDK.initialize()` and `HubSightApiClient.updateConfig()` were using `gateway_url` (no `/api` suffix) instead of `api_base_url` to configure the Dio client's `baseUrl`, causing all REST API calls to hit the wrong path. Requests now correctly target `api_base_url` as defined in the `.hscfg` config.
+
 ## 1.1.0 - 2026-09-12
 
 ### Added
