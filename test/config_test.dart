@@ -9,6 +9,7 @@ void main() {
   group('HscfgDecoder Tests', () {
     const testPin = '123456';
     late Uint8List validHscfgBytes;
+    late Uint8List valid32ByteHscfgBytes;
 
     setUpAll(() async {
       // Create test ZIP archive containing urls.yml, key.yml, metadata.yml
@@ -85,9 +86,30 @@ created_by: "admin"
       builder.add(secretBox.mac.bytes);
 
       validHscfgBytes = builder.toBytes();
+
+      // Generate 32-byte salt (HubSight server standard) and Nonce (12 bytes)
+      final salt32 = Uint8List.fromList(List.generate(32, (i) => (i * 7) % 256));
+      final nonce32 = Uint8List.fromList(List.generate(12, (i) => (i * 13) % 256));
+      final secretKey32 = await kdf.deriveKey(
+        secretKey: SecretKey(utf8.encode(testPin)),
+        nonce: salt32,
+      );
+      final secretBox32 = await aesGcm.encrypt(
+        zipBytes,
+        secretKey: secretKey32,
+        nonce: nonce32,
+        aad: magicHeader,
+      );
+      final builder32 = BytesBuilder();
+      builder32.add(magicHeader);
+      builder32.add(salt32);
+      builder32.add(nonce32);
+      builder32.add(secretBox32.cipherText);
+      builder32.add(secretBox32.mac.bytes);
+      valid32ByteHscfgBytes = builder32.toBytes();
     });
 
-    test('decrypts valid .hscfg container with correct PIN', () async {
+    test('decrypts valid .hscfg container with correct PIN (16-byte salt fallback)', () async {
       final config = await HscfgDecoder.decrypt(
         fileBytes: validHscfgBytes,
         pin6Digits: testPin,
@@ -99,6 +121,21 @@ created_by: "admin"
       expect(config.key.clientId, equals('hs_mob_test_client'));
       expect(config.key.clientName, equals('Test Mobile App'));
       expect(config.key.allowedScopes, contains('cameras:view'));
+      expect(config.metadata.name, equals('Test Config HQ'));
+      expect(config.apiKey, equals('hs_mob_test_client'));
+    });
+
+    test('decrypts valid 32-byte salt container (HubSight server standard)', () async {
+      final config = await HscfgDecoder.decrypt(
+        fileBytes: valid32ByteHscfgBytes,
+        pin6Digits: testPin,
+        verifySignature: false,
+      );
+
+      expect(config.urls.gatewayUrl, equals('https://cctv.quoctran.space'));
+      expect(config.urls.relayWsUrl, equals('wss://cctv.quoctran.space/relay'));
+      expect(config.key.clientId, equals('hs_mob_test_client'));
+      expect(config.key.clientName, equals('Test Mobile App'));
       expect(config.metadata.name, equals('Test Config HQ'));
       expect(config.apiKey, equals('hs_mob_test_client'));
     });

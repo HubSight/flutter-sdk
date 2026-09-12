@@ -36,9 +36,8 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
   ) async {
     // 1. Mandatory App API Key
     final apiKey = _getApiKey();
-    if (apiKey.isNotEmpty) {
-      options.headers['X-API-Key'] = apiKey;
-    }
+    options.headers['X-API-Key'] =
+        apiKey.isNotEmpty ? apiKey : 'hs_mob_client_default';
 
     // 2. Client Device Metadata Headers
     final device = _getDeviceMetadata();
@@ -171,7 +170,9 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
           Endpoints.authRefresh,
           options: Options(
             headers: {
-              'X-API-Key': _getApiKey(),
+              'X-API-Key': _getApiKey().isNotEmpty
+                  ? _getApiKey()
+                  : 'hs_mob_client_default',
               'Content-Type': 'application/json',
             },
           ),

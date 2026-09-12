@@ -23,7 +23,7 @@ class HubSightApiClient {
     void Function(MaintenanceException exception)? onMaintenance,
     Dio? customDio,
   })  : _baseUrl = baseUrl,
-        _apiKey = apiKey,
+        _apiKey = apiKey.isNotEmpty ? apiKey : 'hs_mob_client_default',
         _storage = storage,
         _deviceMetadata = deviceMetadata,
         _dio = customDio ??
@@ -57,7 +57,8 @@ class HubSightApiClient {
 
   void updateConfig(HubSightAppConfig config) {
     _baseUrl = config.urls.gatewayUrl;
-    _apiKey = config.apiKey;
+    _apiKey =
+        config.apiKey.isNotEmpty ? config.apiKey : 'hs_mob_client_default';
     _dio.options.baseUrl = _baseUrl;
   }
 

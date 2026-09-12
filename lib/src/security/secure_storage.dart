@@ -9,6 +9,9 @@ class HubSightSecureStorage {
   static const String _keyConfigUrls = 'hs_config_urls';
   static const String _keyConfigKey = 'hs_config_key';
   static const String _keyConfigMetadata = 'hs_config_metadata';
+  static const String _keyBioUsername = 'hs_bio_username';
+  static const String _keyBioPassword = 'hs_bio_password';
+  static const String _keyLastUsername = 'hs_last_username';
 
   final FlutterSecureStorage _storage;
 
@@ -83,6 +86,51 @@ class HubSightSecureStorage {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Save credentials for quick biometric sign-in.
+  Future<void> saveBiometricCredentials({
+    required String username,
+    required String password,
+  }) async {
+    await _storage.write(key: _keyBioUsername, value: username);
+    await _storage.write(key: _keyBioPassword, value: password);
+    await saveLastUsername(username);
+  }
+
+  /// Retrieve saved biometric sign-in credentials.
+  Future<Map<String, String>?> getBiometricCredentials() async {
+    final username = await _storage.read(key: _keyBioUsername);
+    final password = await _storage.read(key: _keyBioPassword);
+    if (username != null &&
+        username.isNotEmpty &&
+        password != null &&
+        password.isNotEmpty) {
+      return {'username': username, 'password': password};
+    }
+    return null;
+  }
+
+  /// Check if biometric sign-in credentials are saved.
+  Future<bool> hasBiometricCredentials() async {
+    final creds = await getBiometricCredentials();
+    return creds != null;
+  }
+
+  /// Clear stored biometric sign-in credentials.
+  Future<void> clearBiometricCredentials() async {
+    await _storage.delete(key: _keyBioUsername);
+    await _storage.delete(key: _keyBioPassword);
+  }
+
+  /// Save last successfully logged-in username for autofill.
+  Future<void> saveLastUsername(String username) async {
+    await _storage.write(key: _keyLastUsername, value: username);
+  }
+
+  /// Retrieve last successfully logged-in username.
+  Future<String?> getLastUsername() async {
+    return await _storage.read(key: _keyLastUsername);
   }
 
   /// Clear all persisted configurations and tokens.

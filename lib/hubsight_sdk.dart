@@ -24,6 +24,7 @@ export 'src/auth/auth_manager.dart';
 export 'src/auth/models/auth_response.dart';
 export 'src/auth/models/user_profile.dart';
 export 'src/auth/models/session_item.dart';
+export 'src/auth/models/passkey_item.dart';
 
 // Cameras
 export 'src/cameras/camera_service.dart';

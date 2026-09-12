@@ -24,6 +24,7 @@ class AIAlertEvent {
   final String? message;
   final String? thumbnailUrl;
   final DateTime timestamp;
+  final Map<String, dynamic>? rawPayload;
 
   const AIAlertEvent({
     required this.cameraId,
@@ -32,6 +33,7 @@ class AIAlertEvent {
     this.message,
     this.thumbnailUrl,
     required this.timestamp,
+    this.rawPayload,
   });
 
   factory AIAlertEvent.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,7 @@ class AIAlertEvent {
       thumbnailUrl: json['thumbnail_url'] as String?,
       timestamp: DateTime.tryParse(json['timestamp'] as String? ?? '') ??
           DateTime.now(),
+      rawPayload: json,
     );
   }
 }

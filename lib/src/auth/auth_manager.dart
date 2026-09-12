@@ -4,6 +4,7 @@ import '../network/endpoints.dart';
 import '../security/device_info_collector.dart';
 import '../security/secure_storage.dart';
 import 'models/auth_response.dart';
+import 'models/passkey_item.dart';
 import 'models/session_item.dart';
 import 'models/user_profile.dart';
 
@@ -219,6 +220,139 @@ class HubSightAuthManager {
   /// Remotely revoke a specific session.
   Future<void> revokeSession(String sessionId) async {
     await _client.delete(Endpoints.profileSessionRevoke(sessionId));
+  }
+
+  // ── Passkey / FIDO2 (WebAuthn) ─────────────────────────────────────────────
+
+  /// Fetch list of registered passkey credentials for current user.
+  Future<List<PasskeyItem>> listPasskeys() async {
+    final data = await _client.get(Endpoints.authPasskeys);
+    final list = (data as List? ?? []);
+    return list
+        .map((e) => PasskeyItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
+  /// Request passkey login assertion options from server.
+  Future<Map<String, dynamic>> getPasskeyLoginOptions(String username) async {
+    final trimmed = username.trim();
+    final data = await _client.post(
+      Endpoints.authPasskeyLoginOptions,
+      data: {'username': trimmed},
+    );
+    return Map<String, dynamic>.from(data as Map);
+  }
+
+  /// Verify passkey assertion response and establish authenticated session.
+  Future<AuthResult> verifyPasskeyLogin({
+    required String challengeId,
+    required String credential,
+    Map<String, dynamic>? customDeviceInfo,
+  }) async {
+    final device = await _deviceCollector.collect();
+    _client.updateDeviceMetadata(device);
+
+    final payload = {
+      'challenge_id': challengeId,
+      'credential': credential,
+      'is_pwa': false,
+      'device_info': customDeviceInfo ?? device.toMap(),
+    };
+
+    final data =
+        await _client.post(Endpoints.authPasskeyLoginVerify, data: payload);
+    final result = AuthResult.fromJson(Map<String, dynamic>.from(data as Map));
+
+    if (result.isSuccess && result.accessToken != null) {
+      await _storage.saveTokens(
+        accessToken: result.accessToken!,
+        refreshToken: result.refreshToken,
+      );
+      _currentUser = result.user;
+      _userStreamController.add(_currentUser);
+    }
+
+    return result;
+  }
+
+  /// Request passkey registration options.
+  Future<Map<String, dynamic>> getPasskeyRegisterOptions() async {
+    final data = await _client.post(Endpoints.authPasskeyRegisterOptions);
+    return Map<String, dynamic>.from(data as Map);
+  }
+
+  /// Verify passkey registration assertion.
+  Future<PasskeyItem> verifyPasskeyRegister({
+    required String challengeId,
+    required String credential,
+    required String name,
+  }) async {
+    final data = await _client.post(
+      Endpoints.authPasskeyRegisterVerify,
+      data: {
+        'challenge_id': challengeId,
+        'credential': credential,
+        'name': name,
+      },
+    );
+    final resMap = Map<String, dynamic>.from(data as Map);
+    final passkeyMap = resMap['passkey'] != null
+        ? Map<String, dynamic>.from(resMap['passkey'] as Map)
+        : resMap;
+    return PasskeyItem.fromJson(passkeyMap);
+  }
+
+  /// Rename a registered passkey.
+  Future<void> renamePasskey(String id, String name) async {
+    await _client.put(Endpoints.authPasskeyItem(id), data: {'name': name});
+  }
+
+  /// Delete/revoke a registered passkey.
+  Future<void> deletePasskey(String id) async {
+    await _client.delete(Endpoints.authPasskeyItem(id));
+  }
+
+  // ── Quick Biometric Login ──────────────────────────────────────────────────
+
+  /// Save credentials securely for biometric sign-in.
+  Future<void> saveBiometricCredentials({
+    required String username,
+    required String password,
+  }) async {
+    await _storage.saveBiometricCredentials(
+      username: username,
+      password: password,
+    );
+  }
+
+  /// Retrieve stored biometric credentials.
+  Future<Map<String, String>?> getBiometricCredentials() async {
+    return await _storage.getBiometricCredentials();
+  }
+
+  /// Check whether biometric credentials exist in secure storage.
+  Future<bool> hasBiometricCredentials() async {
+    return await _storage.hasBiometricCredentials();
+  }
+
+  /// Remove stored biometric credentials.
+  Future<void> clearBiometricCredentials() async {
+    await _storage.clearBiometricCredentials();
+  }
+
+  /// Perform automatic login with saved biometric credentials.
+  Future<AuthResult?> loginWithBiometrics() async {
+    final creds = await _storage.getBiometricCredentials();
+    if (creds == null) return null;
+    return await login(
+      username: creds['username']!,
+      password: creds['password']!,
+    );
+  }
+
+  /// Retrieve the last successfully used username for autofill.
+  Future<String?> getLastUsername() async {
+    return await _storage.getLastUsername();
   }
 
   void dispose() {

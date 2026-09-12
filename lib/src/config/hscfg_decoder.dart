@@ -50,53 +50,90 @@ class HscfgDecoder {
       }
     }
 
-    // 2. Extract Salt, Nonce, Ciphertext and Auth Tag
-    final salt = fileBytes.sublist(6, 22);
-    final nonce = fileBytes.sublist(22, 34);
-    final ciphertextWithTag = fileBytes.sublist(34);
+    // 2. Multi-format Decryption (Try 32-byte salt first as in HubSight backend, fallback to 16-byte)
+    Uint8List? decryptedZipBytes;
 
-    if (ciphertextWithTag.length < 16) {
-      throw const HubSightConfigException(
-        code: HubSightErrorCode.configCorrupted,
-        developerMessage:
-            'Ciphertext missing required 16-byte GCM authentication tag.',
-      );
+    // 2a. Try 32-byte salt (Production HubSight Gateway crypto.go standard)
+    if (fileBytes.length >= 6 + 32 + 12 + 16) {
+      try {
+        final salt = fileBytes.sublist(6, 38);
+        final nonce = fileBytes.sublist(38, 50);
+        final ciphertextWithTag = fileBytes.sublist(50);
+        final cipherLen = ciphertextWithTag.length - 16;
+        final cipherText = ciphertextWithTag.sublist(0, cipherLen);
+        final macTag = ciphertextWithTag.sublist(cipherLen);
+
+        final kdf = Argon2id(
+          parallelism: 2,
+          memory: 65536, // 64 MB
+          iterations: 4,
+          hashLength: 32,
+        );
+
+        final secretKey = await kdf.deriveKey(
+          secretKey: SecretKey(utf8.encode(cleanPin)),
+          nonce: salt,
+        );
+
+        final aesGcm = AesGcm.with256bits();
+        final secretBox = SecretBox(
+          cipherText,
+          nonce: nonce,
+          mac: Mac(macTag),
+        );
+
+        final decrypted = await aesGcm.decrypt(
+          secretBox,
+          secretKey: secretKey,
+          aad: magicHeader,
+        );
+        decryptedZipBytes = Uint8List.fromList(decrypted);
+      } catch (_) {
+        // Fall through to 16-byte salt fallback
+      }
     }
 
-    // 3. Derive 256-bit AES key using Argon2id
-    final kdf = Argon2id(
-      parallelism: 2,
-      memory: 65536, // 64 MB
-      iterations: 4,
-      hashLength: 32,
-    );
+    // 2b. Try 16-byte salt fallback (test fixtures)
+    if (decryptedZipBytes == null && fileBytes.length >= 6 + 16 + 12 + 16) {
+      try {
+        final salt = fileBytes.sublist(6, 22);
+        final nonce = fileBytes.sublist(22, 34);
+        final ciphertextWithTag = fileBytes.sublist(34);
+        final cipherLen = ciphertextWithTag.length - 16;
+        final cipherText = ciphertextWithTag.sublist(0, cipherLen);
+        final macTag = ciphertextWithTag.sublist(cipherLen);
 
-    final secretKey = await kdf.deriveKey(
-      secretKey: SecretKey(utf8.encode(cleanPin)),
-      nonce: salt,
-    );
+        final kdf = Argon2id(
+          parallelism: 2,
+          memory: 65536, // 64 MB
+          iterations: 4,
+          hashLength: 32,
+        );
 
-    // 4. Decrypt AES-256-GCM with AAD
-    final aesGcm = AesGcm.with256bits();
-    final cipherLen = ciphertextWithTag.length - 16;
-    final cipherText = ciphertextWithTag.sublist(0, cipherLen);
-    final macTag = ciphertextWithTag.sublist(cipherLen);
+        final secretKey = await kdf.deriveKey(
+          secretKey: SecretKey(utf8.encode(cleanPin)),
+          nonce: salt,
+        );
 
-    final secretBox = SecretBox(
-      cipherText,
-      nonce: nonce,
-      mac: Mac(macTag),
-    );
+        final aesGcm = AesGcm.with256bits();
+        final secretBox = SecretBox(
+          cipherText,
+          nonce: nonce,
+          mac: Mac(macTag),
+        );
 
-    Uint8List decryptedZipBytes;
-    try {
-      final decrypted = await aesGcm.decrypt(
-        secretBox,
-        secretKey: secretKey,
-        aad: magicHeader,
-      );
-      decryptedZipBytes = Uint8List.fromList(decrypted);
-    } catch (e) {
+        final decrypted = await aesGcm.decrypt(
+          secretBox,
+          secretKey: secretKey,
+          aad: magicHeader,
+        );
+        decryptedZipBytes = Uint8List.fromList(decrypted);
+      } catch (_) {
+        // Both salt sizes failed
+      }
+    }
+
+    if (decryptedZipBytes == null) {
       throw const HubSightConfigException(
         code: HubSightErrorCode.configDecryptionFailed,
         developerMessage:
@@ -191,8 +228,8 @@ class HscfgDecoder {
         metadata.ed25519PublicKey!.isNotEmpty &&
         metadata.signature!.isNotEmpty) {
       try {
-        final pubKeyBytes = _hexDecode(metadata.ed25519PublicKey!);
-        final sigBytes = _hexDecode(metadata.signature!);
+        final pubKeyBytes = _decodeBytes(metadata.ed25519PublicKey!);
+        final sigBytes = _decodeBytes(metadata.signature!);
 
         final algorithm = Ed25519();
         final isValid = await algorithm.verify(
@@ -249,6 +286,22 @@ class HscfgDecoder {
       return val.map((e) => _convertYamlValue(e)).toList();
     }
     return val;
+  }
+
+  static Uint8List _decodeBytes(String input) {
+    final clean = input.replaceAll(RegExp(r'\s+'), '');
+    final isHex =
+        RegExp(r'^[0-9a-fA-F]+$').hasMatch(clean) && clean.length % 2 == 0;
+    if (isHex && (clean.length == 64 || clean.length == 128)) {
+      try {
+        return _hexDecode(clean);
+      } catch (_) {}
+    }
+    try {
+      return base64.decode(clean);
+    } catch (_) {
+      return _hexDecode(clean);
+    }
   }
 
   static Uint8List _hexDecode(String hex) {
