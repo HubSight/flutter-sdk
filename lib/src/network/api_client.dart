@@ -56,7 +56,7 @@ class HubSightApiClient {
   HubSightDeviceMetadata? get deviceMetadata => _deviceMetadata;
 
   void updateConfig(HubSightAppConfig config) {
-    _baseUrl = config.urls.gatewayUrl;
+    _baseUrl = config.urls.apiBaseUrl;
     _apiKey =
         config.apiKey.isNotEmpty ? config.apiKey : 'hs_mob_client_default';
     _dio.options.baseUrl = _baseUrl;

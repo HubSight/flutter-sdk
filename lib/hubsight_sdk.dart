@@ -137,7 +137,7 @@ class HubSightSDK {
     late HubSightSDK sdk;
 
     final apiClient = HubSightApiClient(
-      baseUrl: config.urls.gatewayUrl,
+      baseUrl: config.urls.apiBaseUrl,
       apiKey: config.apiKey,
       storage: secStorage,
       deviceMetadata: deviceMeta,
