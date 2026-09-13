@@ -54,6 +54,32 @@ class AppNotification {
       'created_at': createdAt.toIso8601String(),
     };
   }
+
+  AppNotification copyWith({
+    String? id,
+    String? cameraId,
+    String? type,
+    String? title,
+    String? body,
+    String? category,
+    String? memberId,
+    String? thumbnailUrl,
+    bool? isRead,
+    DateTime? createdAt,
+  }) {
+    return AppNotification(
+      id: id ?? this.id,
+      cameraId: cameraId ?? this.cameraId,
+      type: type ?? this.type,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      category: category ?? this.category,
+      memberId: memberId ?? this.memberId,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 /// Paginated notifications response.

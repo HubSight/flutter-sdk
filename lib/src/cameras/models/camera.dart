@@ -46,6 +46,28 @@ class Camera {
     };
   }
 
+  Camera copyWith({
+    String? id,
+    String? name,
+    String? host,
+    bool? isActive,
+    bool? isStopped,
+    bool? enableAI,
+    String? thumbnailUrl,
+    String? streamName,
+  }) {
+    return Camera(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      host: host ?? this.host,
+      isActive: isActive ?? this.isActive,
+      isStopped: isStopped ?? this.isStopped,
+      enableAI: enableAI ?? this.enableAI,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      streamName: streamName ?? this.streamName,
+    );
+  }
+
   /// Whether the camera is currently streaming and can be viewed.
   bool get isStreaming => isActive && !isStopped;
 }

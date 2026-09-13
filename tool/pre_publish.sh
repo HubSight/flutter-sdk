@@ -15,6 +15,13 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ "${1:-}" == "--bump" || "${1:-}" == "-b" ]]; then
+  shift
+  exec "${SCRIPT_DIR}/release.sh" "$@"
+fi
+
 echo -e "${BLUE}======================================================${NC}"
 echo -e "${BLUE}   HubSight SDK - Pre-Publish Quality Gatekeeper      ${NC}"
 echo -e "${BLUE}======================================================${NC}"

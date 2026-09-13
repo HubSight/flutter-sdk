@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../config/app_config.dart';
 import '../security/device_info_collector.dart';
@@ -134,32 +135,45 @@ class HubSightApiClient {
       }
 
       final response = e.response;
-      if (response != null && response.data is Map) {
-        final map = Map<String, dynamic>.from(response.data as Map);
+      Map<String, dynamic>? errorMap;
+      if (response != null) {
+        if (response.data is Map) {
+          errorMap = Map<String, dynamic>.from(response.data as Map);
+        } else if (response.data is String) {
+          try {
+            final decoded = jsonDecode(response.data as String);
+            if (decoded is Map) {
+              errorMap = Map<String, dynamic>.from(decoded);
+            }
+          } catch (_) {}
+        }
+      }
+
+      if (errorMap != null) {
         final code = HubSightErrorCode.fromBackendCode(
-          map['code'] as String?,
-          response.statusCode,
+          errorMap['code'] as String?,
+          response?.statusCode,
         );
-        final devMsg = map['message_en'] as String? ??
-            map['message'] as String? ??
+        final devMsg = errorMap['message_en'] as String? ??
+            errorMap['message'] as String? ??
             'API returned error: ${code.wireCode}';
 
-        if (response.statusCode == 401 || response.statusCode == 403) {
+        if (response?.statusCode == 401 || response?.statusCode == 403) {
           throw HubSightAuthException(
             code: code,
-            statusCode: response.statusCode,
+            statusCode: response?.statusCode,
             developerMessage: devMsg,
-            rawResponse: map,
-            details: map['errors'] ?? map['details'],
+            rawResponse: errorMap,
+            details: errorMap['errors'] ?? errorMap['details'],
           );
         }
 
-        return throw HubSightApiException(
+        throw HubSightApiException(
           code: code,
-          statusCode: response.statusCode,
+          statusCode: response?.statusCode,
           developerMessage: devMsg,
-          rawResponse: map,
-          details: map['errors'] ?? map['details'],
+          rawResponse: errorMap,
+          details: errorMap['errors'] ?? errorMap['details'],
         );
       }
 
@@ -174,9 +188,13 @@ class HubSightApiClient {
         netCode = HubSightErrorCode.networkCanceled;
       }
 
+      final detail = e.message ??
+          (e.error != null
+              ? e.error.toString()
+              : 'Network transport failure (${e.type})');
       throw HubSightNetworkException(
         code: netCode,
-        developerMessage: e.message ?? 'Network transport failure (${e.type})',
+        developerMessage: detail,
         statusCode: response?.statusCode,
       );
     }

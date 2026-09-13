@@ -55,61 +55,84 @@ All releases follow strict `MAJOR.MINOR.PATCH` increments:
 
 ---
 
-## 4. Release Procedure (Step-by-Step SOP)
+## 4. Release Procedure
 
-Follow these exact steps to prepare and release a new version:
+### 4.1. Automated Release (Recommended)
 
-### Step 1: Update Version in `pubspec.yaml`
-Open `pubspec.yaml` and update the version number:
-```yaml
-name: hubsight_sdk
-version: 1.0.1
+The SDK provides an automated release script [`tool/release.sh`](../tool/release.sh) that manages the entire release cycle in a single command:
+1. Prompts for or parses the target SemVer bump (`patch`, `minor`, `major`, or custom version).
+2. Automatically drafts the changelog in `CHANGELOG.md` with today's date from git commits since the last release tag (categorized into `Added`, `Fixed`, `Changed`) or custom release notes.
+3. Automatically updates `version: X.Y.Z` in `pubspec.yaml`.
+4. Runs full quality checks (`dart format`, `dart analyze --fatal-infos`, `flutter test`).
+5. Creates the git commit (`chore(release): vX.Y.Z`) and git tag (`vX.Y.Z`).
+6. Runs `flutter pub publish --dry-run` on clean working tree.
+7. Prompts to push the commit and tag to GitHub, triggering automated deployment to pub.dev via OIDC!
+
+#### Usage Examples:
+```bash
+# Interactive mode (prompts for bump type & release note)
+./tool/release.sh
+
+# Fast patch bump with custom release note
+./tool/release.sh patch "Fix base URL path in ApiClient"
+
+# Fast minor feature bump
+./tool/release.sh minor "Add support for camera homography calibration"
+
+# Specific version bump
+./tool/release.sh 1.2.0 "Revamped media streaming engine"
+
+# Dry run (simulates checks and rolls back changes without committing)
+./tool/release.sh --dry-run
 ```
 
-### Step 2: Document Release in `CHANGELOG.md`
-Open `CHANGELOG.md` and add a new section above previous versions:
-```markdown
-## 1.0.1 - 2026-09-12
+You can also run via the pre-publish gatekeeper:
+```bash
+./tool/pre_publish.sh --bump [patch|minor|major] ["Optional note"]
+```
 
-### Added
-- PTZ camera preset position recall.
+---
+
+### 4.2. Manual Step-by-Step Procedure
+
+If you prefer performing the steps manually:
+
+#### Step 1: Update Version in `pubspec.yaml`
+```yaml
+name: hubsight_sdk
+version: 1.1.2
+```
+
+#### Step 2: Document Release in `CHANGELOG.md`
+```markdown
+## 1.1.2 - 2026-09-13
 
 ### Fixed
 - Resolved minor reconnection timeout when switching cellular networks.
 ```
 
-### Step 3: Run the Pre-Publish Quality Gatekeeper
-Execute the pre-publish gatekeeper script from the root workspace:
+#### Step 3: Run the Pre-Publish Quality Gatekeeper
 ```bash
 ./tool/pre_publish.sh
 ```
 
-The script automatically executes and validates:
-- [x] **Git Status**: Verifies there are no uncommitted or untracked changes.
-- [x] **Code Formatting**: Runs `dart format --output=none --set-exit-if-changed .`.
-- [x] **Static Code Analysis**: Runs `dart analyze --fatal-infos`.
-- [x] **Automated Tests**: Runs `flutter test` across all unit test suites.
-- [x] **Version Consistency**: Ensures the version in `pubspec.yaml` matches an entry in `CHANGELOG.md`.
-- [x] **Dry-Run Package Validation**: Runs `flutter pub publish --dry-run` to ensure zero warnings.
-
-### Step 4: Commit the Release Preparation
+#### Step 4: Commit the Release Preparation
 ```bash
 git add pubspec.yaml CHANGELOG.md
-git commit -m "chore(release): prepare v1.0.1"
+git commit -m "chore(release): prepare v1.1.2"
 git push origin main
 ```
 
-### Step 5: Tag & Deploy
-Create the annotated git tag matching the version and push it to GitHub:
+#### Step 5: Tag & Deploy
 ```bash
-git tag v1.0.1
-git push origin v1.0.1
+git tag v1.1.2
+git push origin v1.1.2
 ```
 
 Once pushed, GitHub Actions automatically starts the **Publish to pub.dev** workflow:
 - Validates the environment.
 - Exchanges OIDC tokens with Google's authentication service.
-- Deploys `hubsight_sdk 1.0.1` directly to [pub.dev/packages/hubsight_sdk](https://pub.dev/packages/hubsight_sdk).
+- Deploys `hubsight_sdk 1.1.2` directly to [pub.dev/packages/hubsight_sdk](https://pub.dev/packages/hubsight_sdk).
 
 ---
 

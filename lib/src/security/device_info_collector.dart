@@ -65,11 +65,15 @@ class HubSightDeviceMetadata {
     };
   }
 
+  static String _toAsciiHeader(String val) {
+    return val.replaceAll(RegExp(r'[^\x20-\x7E]'), '').trim();
+  }
+
   Map<String, String> toHeaders() {
     return {
-      'X-Device-Fingerprint': fingerprint,
-      'X-Device-Label': deviceLabel,
-      'X-Client-Type': clientType,
+      'X-Device-Fingerprint': _toAsciiHeader(fingerprint),
+      'X-Device-Label': _toAsciiHeader(deviceLabel),
+      'X-Client-Type': _toAsciiHeader(clientType),
     };
   }
 }
@@ -159,7 +163,7 @@ class DeviceInfoCollector {
     final timezone = DateTime.now().timeZoneName;
     final locale = Platform.localeName;
     final deviceLabel =
-        '$manufacturer $model ($platformName $osVersion) • App v$appVersion'
+        '$manufacturer $model ($platformName $osVersion) - App v$appVersion'
             .trim();
 
     return HubSightDeviceMetadata(
