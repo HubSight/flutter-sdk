@@ -79,6 +79,7 @@ System administrators can trigger an emergency maintenance switch (Kill-Switch) 
 | | `GET /api/app/v1/notifications` | Yes | Paginated notifications list with category filtering |
 | | `PATCH /api/app/v1/notifications/:id/read` | Yes | Mark single notification as read |
 | | `POST /api/app/v1/notifications/read-all` | Yes | Mark all notifications as read |
+| | `DELETE /api/app/v1/notifications/batch?ids=:id1,:id2` | Yes | Delete multiple notifications in one request |
 | | `DELETE /api/app/v1/notifications/:id` | Yes | Delete single notification |
 
 ---
@@ -367,6 +368,19 @@ Ultra-lightweight endpoint for app badge updates:
   "unread_count": 4
 }
 ```
+
+#### `DELETE /api/app/v1/notifications/batch?ids=:id1,:id2`
+Deletes multiple notification records in one request. The `ids` query parameter is a comma-separated list; empty and duplicate IDs are ignored.
+
+Response `200 OK`:
+```json
+{
+  "status": "ok",
+  "deleted": 2
+}
+```
+
+A request without valid IDs returns `400 INVALID_INPUT`. If no matching notification is found, the endpoint returns `404 NOTIFICATION_NOT_FOUND`.
 
 ---
 

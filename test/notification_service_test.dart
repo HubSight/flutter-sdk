@@ -16,10 +16,12 @@ void main() {
     late HubSightApiClient client;
     late HubSightNotificationService notifService;
     late HubSightFCMManager fcmManager;
+    late _MockNotificationAdapter adapter;
 
     setUp(() {
       final dio = Dio(BaseOptions(baseUrl: 'https://cctv.quoctran.space'));
-      dio.httpClientAdapter = _MockNotificationAdapter();
+      adapter = _MockNotificationAdapter();
+      dio.httpClientAdapter = adapter;
 
       client = HubSightApiClient(
         baseUrl: 'https://cctv.quoctran.space',
@@ -59,6 +61,34 @@ void main() {
       await expectLater(notifService.markAllAsRead(), completes);
     });
 
+    test('deleteNotifications sends normalized IDs and returns deleted count',
+        () async {
+      final deleted = await notifService.deleteNotifications([
+        ' notif_001 ',
+        '',
+        'notif_002',
+        'notif_001',
+      ]);
+
+      expect(deleted, equals(2));
+      expect(adapter.lastBatchDeleteRequest?.method, equals('DELETE'));
+      expect(
+        adapter.lastBatchDeleteRequest?.path,
+        equals(Endpoints.notificationsBatchDelete),
+      );
+      expect(
+        adapter.lastBatchDeleteRequest?.queryParameters['ids'],
+        equals('notif_001,notif_002'),
+      );
+    });
+
+    test('deleteNotifications rejects a list without valid IDs', () async {
+      expect(
+        () => notifService.deleteNotifications(['', '  ']),
+        throwsArgumentError,
+      );
+    });
+
     test('deleteNotification completes successfully', () async {
       await expectLater(
           notifService.deleteNotification('notif_001'), completes);
@@ -74,6 +104,8 @@ void main() {
 }
 
 class _MockNotificationAdapter implements HttpClientAdapter {
+  RequestOptions? lastBatchDeleteRequest;
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -114,6 +146,17 @@ class _MockNotificationAdapter implements HttpClientAdapter {
             }
           ],
         }),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.notificationsBatchDelete) {
+      lastBatchDeleteRequest = options;
+      return ResponseBody.fromString(
+        jsonEncode({'status': 'ok', 'deleted': 2}),
         200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType]

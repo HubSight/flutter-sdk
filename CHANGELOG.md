@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.0 - 2026-09-13
+
+### Added
+- **Batch Notification Deletion**: Added `HubSightNotificationService.deleteNotifications()` for `DELETE /api/app/v1/notifications/batch`, including empty/duplicate ID normalization and the typed deleted-record count returned by the HubSight API.
+
 ## 1.1.4 - 2026-09-13
 
 ### Added

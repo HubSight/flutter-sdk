@@ -47,6 +47,32 @@ class HubSightNotificationService {
     await _client.post(Endpoints.notificationsReadAll);
   }
 
+  /// Delete multiple notification records in a single request.
+  ///
+  /// Empty IDs and duplicate IDs are ignored. Returns the number of records
+  /// deleted by the server.
+  Future<int> deleteNotifications(Iterable<String> notificationIds) async {
+    final normalizedIds = notificationIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (normalizedIds.isEmpty) {
+      throw ArgumentError.value(
+        notificationIds,
+        'notificationIds',
+        'Must contain at least one non-empty notification ID.',
+      );
+    }
+
+    final data = await _client.delete(
+      Endpoints.notificationsBatchDelete,
+      queryParameters: {'ids': normalizedIds.join(',')},
+    );
+    return ((data as Map)['deleted'] as num?)?.toInt() ?? 0;
+  }
+
   /// Delete a notification record.
   Future<void> deleteNotification(String notificationId) async {
     await _client.delete(Endpoints.notificationDelete(notificationId));

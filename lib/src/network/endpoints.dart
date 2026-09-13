@@ -70,6 +70,8 @@ class Endpoints {
       '$basePrefix/notifications/$id/read';
   static const String notificationsReadAll =
       '$basePrefix/notifications/read-all';
+  static const String notificationsBatchDelete =
+      '$basePrefix/notifications/batch';
   static String notificationDelete(String id) =>
       '$basePrefix/notifications/$id';
 }

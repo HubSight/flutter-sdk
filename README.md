@@ -169,7 +169,7 @@ Or manually declare it in your `pubspec.yaml`:
 dependencies:
     flutter:
         sdk: flutter
-    hubsight_sdk: ^1.0.0
+    hubsight_sdk: ^1.2.0
 ```
 
 ### Alternative Sources
@@ -181,7 +181,7 @@ dependencies:
     hubsight_sdk:
         git:
             url: https://github.com/HubSight/flutter-sdk.git
-            ref: v1.0.0
+            ref: v1.2.0
 ```
 
 Or locally in a monorepo workspace:
@@ -389,6 +389,12 @@ if (fcmToken != null) {
 // Fetch unread count for the app launcher badge:
 final unreadCount = await sdk.notifications.getUnreadCount();
 FlutterAppBadger.updateBadgeCount(unreadCount);
+
+// Delete multiple notifications in a single API request:
+final deletedCount = await sdk.notifications.deleteNotifications([
+  'notification_01',
+  'notification_02',
+]);
 
 // Unregister token upon logout:
 await sdk.fcm.unregisterPushToken(fcmToken);
