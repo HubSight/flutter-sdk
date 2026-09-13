@@ -1,6 +1,6 @@
 name: hubsight_sdk
 description: "Standard Flutter SDK for HubSight CCTV Surveillance Platform. Provides Zero-Config enrollment (.hscfg), Atomic 401 token refresh, Multi-View WebRTC batching, and Real-time Thumbnails."
-version: 1.1.2
+version: 1.1.3
 homepage: https://github.com/HubSight/flutter-sdk
 repository: https://github.com/HubSight/flutter-sdk
 issue_tracker: https://github.com/HubSight/flutter-sdk/issues

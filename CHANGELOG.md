@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.3 - 2026-09-13
+
+### Changed
+- Bugfix send metadata device via HTTP Headers
+
+
 ## 1.1.2 - 2026-09-13
 
 ### Changed
