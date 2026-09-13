@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.1 - 2026-09-13
+
+### Added
+- **ONVIF Profile S PTZ Controls & Presets**:
+  - Continuous, relative, and stop Pan/Tilt/Zoom movements (`HubSightCameraService.ptz`, `continuousMove`, `relativeMove`, `stopPtz`).
+  - Camera preset positions management (`getPresets`, `gotoPreset`, `setPreset`, `removePreset`).
+  - ONVIF discovery and inspection probe (`probeONVIF`).
+  - Added `onvifEnabled` and `onvifPtzSupported` fields to `Camera` model.
+  - Added strongly-typed PTZ models: `PTZActionType`, `PTZActionInput`, `PresetItem`, `ONVIFDeviceInfo`, `ONVIFMediaProfile`, and `ONVIFProbeResult`.
+- **HubSightPtzPad Flutter Widget**:
+  - Touch-sensitive 8-way continuous D-Pad, center emergency Stop button, Zoom In/Out controls, and preset navigation chips.
+- **Batch Notifications Alias**:
+  - Added `batchDeleteNotifications()` convenience alias in `HubSightNotificationService`.
+- **Standardized ONVIF Error Codes**:
+  - Added `onvifProbeFailed`, `onvifNotEnabled`, `onvifPtzNotSupported`, and `onvifActionFailed` with bilingual English and Vietnamese error resolvers.
+
 ## 1.2.0 - 2026-09-13
 
 ### Added
