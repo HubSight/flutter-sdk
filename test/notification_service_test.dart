@@ -89,6 +89,16 @@ void main() {
       );
     });
 
+    test('batchDeleteNotifications delegates to deleteNotifications', () async {
+      final deleted = await notifService.batchDeleteNotifications([
+        'notif_001',
+        'notif_002',
+      ]);
+
+      expect(deleted, equals(2));
+      expect(adapter.lastBatchDeleteRequest?.method, equals('DELETE'));
+    });
+
     test('deleteNotification completes successfully', () async {
       await expectLater(
           notifService.deleteNotification('notif_001'), completes);

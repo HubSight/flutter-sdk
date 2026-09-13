@@ -65,6 +65,10 @@ enum HubSightErrorCode {
   cameraLeaseExpired('CAMERA_LEASE_EXPIRED'),
   streamNotFound('STREAM_NOT_FOUND'),
   poolUnavailable('POOL_UNAVAILABLE'),
+  onvifProbeFailed('ONVIF_PROBE_FAILED'),
+  onvifNotEnabled('ONVIF_NOT_ENABLED'),
+  onvifPtzNotSupported('ONVIF_PTZ_NOT_SUPPORTED'),
+  onvifActionFailed('ONVIF_ACTION_FAILED'),
 
   // --- 7. Archive & NVR Playback ---
   archiveRecordingNotFound('ARCHIVE_RECORDING_NOT_FOUND'),
@@ -184,6 +188,14 @@ enum HubSightErrorCode {
         return HubSightErrorCode.streamNotFound;
       case 'POOL_UNAVAILABLE':
         return HubSightErrorCode.poolUnavailable;
+      case 'ONVIF_PROBE_FAILED':
+        return HubSightErrorCode.onvifProbeFailed;
+      case 'ONVIF_NOT_ENABLED':
+        return HubSightErrorCode.onvifNotEnabled;
+      case 'ONVIF_PTZ_NOT_SUPPORTED':
+        return HubSightErrorCode.onvifPtzNotSupported;
+      case 'ONVIF_ACTION_FAILED':
+        return HubSightErrorCode.onvifActionFailed;
 
       // Archive & Recording
       case 'RECORDING_NOT_FOUND':
@@ -362,6 +374,14 @@ class HubSightDefaultErrorResolver implements HubSightErrorResolver {
     HubSightErrorCode.streamNotFound: 'Camera live stream not found.',
     HubSightErrorCode.poolUnavailable:
         'Connection pool service is unavailable.',
+    HubSightErrorCode.onvifProbeFailed:
+        'Failed to connect to ONVIF service on this device.',
+    HubSightErrorCode.onvifNotEnabled:
+        'ONVIF service is not enabled for this camera.',
+    HubSightErrorCode.onvifPtzNotSupported:
+        'Camera device does not support PTZ controls.',
+    HubSightErrorCode.onvifActionFailed:
+        'Failed to execute ONVIF PTZ movement.',
 
     // Archive
     HubSightErrorCode.archiveRecordingNotFound: 'Video recording not found.',
@@ -488,6 +508,14 @@ class HubSightDefaultErrorResolver implements HubSightErrorResolver {
         'Không tìm thấy luồng phát trực tiếp của camera.',
     HubSightErrorCode.poolUnavailable:
         'Dịch vụ điều phối kết nối luồng không phản hồi.',
+    HubSightErrorCode.onvifProbeFailed:
+        'Không thể kết nối ONVIF với thiết bị này.',
+    HubSightErrorCode.onvifNotEnabled:
+        'Chưa kích hoạt giao thức ONVIF cho camera này.',
+    HubSightErrorCode.onvifPtzNotSupported:
+        'Thiết bị camera này không hỗ trợ quay quét PTZ.',
+    HubSightErrorCode.onvifActionFailed:
+        'Thực thi lệnh điều khiển PTZ thất bại.',
 
     // Archive
     HubSightErrorCode.archiveRecordingNotFound:

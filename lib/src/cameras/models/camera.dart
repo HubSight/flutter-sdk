@@ -8,6 +8,8 @@ class Camera {
   final bool enableAI;
   final String thumbnailUrl;
   final String streamName;
+  final bool onvifEnabled;
+  final bool onvifPtzSupported;
 
   const Camera({
     required this.id,
@@ -18,6 +20,8 @@ class Camera {
     required this.enableAI,
     required this.thumbnailUrl,
     required this.streamName,
+    this.onvifEnabled = false,
+    this.onvifPtzSupported = false,
   });
 
   factory Camera.fromJson(Map<String, dynamic> json) {
@@ -30,6 +34,8 @@ class Camera {
       enableAI: json['enable_ai'] as bool? ?? false,
       thumbnailUrl: json['thumbnail_url'] as String? ?? '',
       streamName: json['stream_name'] as String? ?? '',
+      onvifEnabled: json['onvif_enabled'] as bool? ?? false,
+      onvifPtzSupported: json['onvif_ptz_supported'] as bool? ?? false,
     );
   }
 
@@ -43,6 +49,8 @@ class Camera {
       'enable_ai': enableAI,
       'thumbnail_url': thumbnailUrl,
       'stream_name': streamName,
+      'onvif_enabled': onvifEnabled,
+      'onvif_ptz_supported': onvifPtzSupported,
     };
   }
 
@@ -55,6 +63,8 @@ class Camera {
     bool? enableAI,
     String? thumbnailUrl,
     String? streamName,
+    bool? onvifEnabled,
+    bool? onvifPtzSupported,
   }) {
     return Camera(
       id: id ?? this.id,
@@ -65,6 +75,8 @@ class Camera {
       enableAI: enableAI ?? this.enableAI,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       streamName: streamName ?? this.streamName,
+      onvifEnabled: onvifEnabled ?? this.onvifEnabled,
+      onvifPtzSupported: onvifPtzSupported ?? this.onvifPtzSupported,
     );
   }
 

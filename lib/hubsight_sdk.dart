@@ -29,6 +29,8 @@ export 'src/auth/models/passkey_item.dart';
 // Cameras
 export 'src/cameras/camera_service.dart';
 export 'src/cameras/models/camera.dart';
+export 'src/cameras/models/ptz_models.dart';
+export 'src/cameras/models/onvif_models.dart';
 
 // Media & WebRTC
 export 'src/media/webrtc_manager.dart';
@@ -56,6 +58,7 @@ export 'src/lifecycle/app_lifecycle_manager.dart';
 export 'src/widgets/camera_thumbnail_view.dart';
 export 'src/widgets/webrtc_video_view.dart';
 export 'src/widgets/multi_view_grid.dart';
+export 'src/widgets/ptz_pad.dart';
 
 import 'src/config/app_config.dart';
 import 'src/config/hscfg_decoder.dart';

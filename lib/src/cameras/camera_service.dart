@@ -2,8 +2,10 @@ import '../network/api_client.dart';
 import '../network/endpoints.dart';
 import '../security/secure_storage.dart';
 import 'models/camera.dart';
+import 'models/onvif_models.dart';
+import 'models/ptz_models.dart';
 
-/// Service managing surveillance camera inventory and direct snapshot URLs.
+/// Service managing surveillance camera inventory, direct snapshot URLs, and ONVIF PTZ controls.
 class HubSightCameraService {
   final HubSightApiClient _client;
   final HubSightSecureStorage _storage;
@@ -38,5 +40,129 @@ class HubSightCameraService {
     final ts = bustCache ? '&_t=${DateTime.now().millisecondsSinceEpoch}' : '';
     return '${_client.baseUrl}${Endpoints.cameraThumbnail(cameraId)}'
         '?api_key=${_client.apiKey}&token=$token$ts';
+  }
+
+  /// Send Pan/Tilt/Zoom command to an ONVIF Profile S camera.
+  ///
+  /// [action]: 'move' | 'continuous' | 'relative' | 'stop'
+  /// [pan], [tilt], [zoom]: velocity or relative coordinate step between -1.0 and 1.0.
+  Future<void> ptz(
+    String cameraId, {
+    required String action,
+    double pan = 0.0,
+    double tilt = 0.0,
+    double zoom = 0.0,
+  }) async {
+    await _client.post(
+      Endpoints.cameraPTZ(cameraId),
+      data: PTZActionInput(
+        action: action,
+        pan: pan,
+        tilt: tilt,
+        zoom: zoom,
+      ).toJson(),
+    );
+  }
+
+  /// Start continuous PTZ movement with velocity vectors (-1.0 to 1.0).
+  Future<void> continuousMove(
+    String cameraId, {
+    double pan = 0.0,
+    double tilt = 0.0,
+    double zoom = 0.0,
+  }) {
+    return ptz(
+      cameraId,
+      action: 'continuous',
+      pan: pan,
+      tilt: tilt,
+      zoom: zoom,
+    );
+  }
+
+  /// Move camera relative by a single step (-1.0 to 1.0).
+  Future<void> relativeMove(
+    String cameraId, {
+    double pan = 0.0,
+    double tilt = 0.0,
+    double zoom = 0.0,
+  }) {
+    return ptz(
+      cameraId,
+      action: 'relative',
+      pan: pan,
+      tilt: tilt,
+      zoom: zoom,
+    );
+  }
+
+  /// Stop all continuous Pan/Tilt/Zoom movements immediately.
+  Future<void> stopPtz(String cameraId) {
+    return ptz(cameraId, action: 'stop');
+  }
+
+  /// List all preset positions saved on the camera.
+  Future<List<PresetItem>> getPresets(String cameraId) async {
+    final data = await _client.get(Endpoints.cameraPresets(cameraId));
+    final presetsRaw =
+        (data is List) ? data : ((data as Map)['presets'] as List? ?? []);
+    return presetsRaw
+        .map((e) => PresetItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
+  /// Command camera to rotate to a saved preset position.
+  Future<void> gotoPreset(String cameraId, String presetToken) async {
+    await _client.post(
+      Endpoints.cameraPresets(cameraId),
+      data: {
+        'action': 'goto',
+        'preset_token': presetToken,
+      },
+    );
+  }
+
+  /// Save current camera physical coordinates as a new preset position.
+  Future<PresetItem> setPreset(String cameraId, String presetName) async {
+    final data = await _client.post(
+      Endpoints.cameraPresets(cameraId),
+      data: {
+        'action': 'set',
+        'preset_name': presetName,
+      },
+    );
+    return PresetItem.fromJson(Map<String, dynamic>.from(data as Map));
+  }
+
+  /// Remove a saved preset point from the camera.
+  Future<void> removePreset(String cameraId, String presetToken) async {
+    await _client.post(
+      Endpoints.cameraPresets(cameraId),
+      data: {
+        'action': 'remove',
+        'preset_token': presetToken,
+      },
+    );
+  }
+
+  /// Probe and auto-discover ONVIF hardware, firmware, stream URIs and PTZ capabilities.
+  Future<ONVIFProbeResult> probeONVIF({
+    String? cameraId,
+    String? host,
+    int port = 80,
+    String? username,
+    String? password,
+  }) async {
+    final data = await _client.post(
+      Endpoints.onvifProbe,
+      data: {
+        if (cameraId != null && cameraId.isNotEmpty) 'camera_id': cameraId,
+        if (host != null && host.isNotEmpty) 'host': host,
+        'port': port,
+        if (username != null && username.isNotEmpty) 'username': username,
+        if (password != null && password.isNotEmpty) 'password': password,
+      },
+    );
+    return ONVIFProbeResult.fromJson(Map<String, dynamic>.from(data as Map));
   }
 }

@@ -73,6 +73,12 @@ class HubSightNotificationService {
     return ((data as Map)['deleted'] as num?)?.toInt() ?? 0;
   }
 
+  /// Delete multiple notification records in a single batch request.
+  ///
+  /// Alias for [deleteNotifications].
+  Future<int> batchDeleteNotifications(Iterable<String> notificationIds) =>
+      deleteNotifications(notificationIds);
+
   /// Delete a notification record.
   Future<void> deleteNotification(String notificationId) async {
     await _client.delete(Endpoints.notificationDelete(notificationId));

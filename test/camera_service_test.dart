@@ -14,11 +14,13 @@ void main() {
     late HubSightApiClient client;
     late HubSightCameraService cameraService;
     late MockStorage mockStorage;
+    late _MockCameraAdapter adapter;
 
     setUp(() {
       mockStorage = MockStorage();
       final dio = Dio(BaseOptions(baseUrl: 'https://cctv.quoctran.space'));
-      dio.httpClientAdapter = _MockCameraAdapter();
+      adapter = _MockCameraAdapter();
+      dio.httpClientAdapter = adapter;
 
       client = HubSightApiClient(
         baseUrl: 'https://cctv.quoctran.space',
@@ -43,6 +45,8 @@ void main() {
       expect(cam1.isActive, isTrue);
       expect(cam1.isStopped, isFalse);
       expect(cam1.isStreaming, isTrue);
+      expect(cam1.onvifEnabled, isTrue);
+      expect(cam1.onvifPtzSupported, isTrue);
       expect(cam1.thumbnailUrl,
           equals('/api/app/v1/cameras/cam_front_door/thumbnail'));
       expect(cam1.streamName, equals('cam_cam_front_door_thumb'));
@@ -52,6 +56,8 @@ void main() {
       expect(cam2.name, equals('Gara xe'));
       expect(cam2.isStopped, isTrue);
       expect(cam2.isStreaming, isFalse);
+      expect(cam2.onvifEnabled, isFalse);
+      expect(cam2.onvifPtzSupported, isFalse);
     });
 
     test('getCamera returns details of single camera', () async {
@@ -60,6 +66,8 @@ void main() {
       expect(camera.id, equals('cam_front_door'));
       expect(camera.name, equals('Cổng chính'));
       expect(camera.host, contains('192.168.1.100'));
+      expect(camera.onvifEnabled, isTrue);
+      expect(camera.onvifPtzSupported, isTrue);
     });
 
     test('buildThumbnailUrl constructs authenticated URL with query parameters',
@@ -74,10 +82,99 @@ void main() {
       expect(url, contains('token=mock_jwt_token'));
       expect(url, contains('&_t='));
     });
+
+    test('continuousMove sends correct PTZ command', () async {
+      await cameraService.continuousMove(
+        'cam_front_door',
+        pan: 0.7,
+        tilt: -0.5,
+        zoom: 0.2,
+      );
+
+      expect(adapter.lastPtzRequest, isNotNull);
+      expect(adapter.lastPtzRequest!.data['action'], equals('continuous'));
+      expect(adapter.lastPtzRequest!.data['pan'], equals(0.7));
+      expect(adapter.lastPtzRequest!.data['tilt'], equals(-0.5));
+      expect(adapter.lastPtzRequest!.data['zoom'], equals(0.2));
+    });
+
+    test('relativeMove sends correct relative command', () async {
+      await cameraService.relativeMove('cam_front_door', pan: 0.1, tilt: 0.2);
+
+      expect(adapter.lastPtzRequest, isNotNull);
+      expect(adapter.lastPtzRequest!.data['action'], equals('relative'));
+      expect(adapter.lastPtzRequest!.data['pan'], equals(0.1));
+      expect(adapter.lastPtzRequest!.data['tilt'], equals(0.2));
+    });
+
+    test('stopPtz sends stop command', () async {
+      await cameraService.stopPtz('cam_front_door');
+
+      expect(adapter.lastPtzRequest, isNotNull);
+      expect(adapter.lastPtzRequest!.data['action'], equals('stop'));
+    });
+
+    test('getPresets returns list of PresetItem', () async {
+      final presets = await cameraService.getPresets('cam_front_door');
+
+      expect(presets.length, equals(2));
+      expect(presets[0].token, equals('preset_1'));
+      expect(presets[0].name, equals('Entrance'));
+      expect(presets[1].token, equals('preset_2'));
+      expect(presets[1].name, equals('Parking Lot'));
+    });
+
+    test('gotoPreset sends goto command with preset token', () async {
+      await cameraService.gotoPreset('cam_front_door', 'preset_1');
+
+      expect(adapter.lastPresetRequest, isNotNull);
+      expect(adapter.lastPresetRequest!.data['action'], equals('goto'));
+      expect(
+          adapter.lastPresetRequest!.data['preset_token'], equals('preset_1'));
+    });
+
+    test('setPreset saves new preset and returns PresetItem', () async {
+      final item = await cameraService.setPreset('cam_front_door', 'Backyard');
+
+      expect(item.name, equals('Backyard'));
+      expect(item.token, equals('preset_new'));
+      expect(adapter.lastPresetRequest, isNotNull);
+      expect(adapter.lastPresetRequest!.data['action'], equals('set'));
+      expect(
+          adapter.lastPresetRequest!.data['preset_name'], equals('Backyard'));
+    });
+
+    test('removePreset sends remove command with preset token', () async {
+      await cameraService.removePreset('cam_front_door', 'preset_1');
+
+      expect(adapter.lastPresetRequest, isNotNull);
+      expect(adapter.lastPresetRequest!.data['action'], equals('remove'));
+      expect(
+          adapter.lastPresetRequest!.data['preset_token'], equals('preset_1'));
+    });
+
+    test('probeONVIF queries ONVIF device info and profiles', () async {
+      final result = await cameraService.probeONVIF(
+        cameraId: 'cam_front_door',
+        host: '192.168.1.100',
+        port: 80,
+      );
+
+      expect(result.success, isTrue);
+      expect(result.hasPtz, isTrue);
+      expect(result.deviceInfo.manufacturer, equals('HubSight Corp'));
+      expect(result.deviceInfo.model, equals('HS-PTZ-500'));
+      expect(result.profiles.length, equals(1));
+      expect(result.profiles[0].token, equals('profile_main'));
+    });
   });
 }
 
 class _MockCameraAdapter implements HttpClientAdapter {
+  RequestOptions? lastPtzRequest;
+  RequestOptions? lastPresetRequest;
+  RequestOptions? lastProbeRequest;
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -98,6 +195,8 @@ class _MockCameraAdapter implements HttpClientAdapter {
               'is_active': true,
               'is_stopped': false,
               'enable_ai': true,
+              'onvif_enabled': true,
+              'onvif_ptz_supported': true,
               'thumbnail_url': '/api/app/v1/cameras/cam_front_door/thumbnail',
               'stream_name': 'cam_cam_front_door_thumb',
             },
@@ -108,6 +207,8 @@ class _MockCameraAdapter implements HttpClientAdapter {
               'is_active': true,
               'is_stopped': true,
               'enable_ai': false,
+              'onvif_enabled': false,
+              'onvif_ptz_supported': false,
               'thumbnail_url': '',
               'stream_name': '',
             }
@@ -129,8 +230,94 @@ class _MockCameraAdapter implements HttpClientAdapter {
           'is_active': true,
           'is_stopped': false,
           'enable_ai': true,
+          'onvif_enabled': true,
+          'onvif_ptz_supported': true,
           'thumbnail_url': '/api/app/v1/cameras/cam_front_door/thumbnail',
           'stream_name': 'cam_cam_front_door_thumb',
+        }),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.cameraPTZ('cam_front_door')) {
+      lastPtzRequest = options;
+      return ResponseBody.fromString(
+        jsonEncode({'status': 'ok'}),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.cameraPresets('cam_front_door')) {
+      lastPresetRequest = options;
+      if (options.method == 'GET') {
+        return ResponseBody.fromString(
+          jsonEncode({
+            'status': 'ok',
+            'presets': [
+              {'token': 'preset_1', 'name': 'Entrance'},
+              {'token': 'preset_2', 'name': 'Parking Lot'},
+            ],
+          }),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType]
+          },
+        );
+      } else if (options.method == 'POST') {
+        final data = options.data as Map<String, dynamic>;
+        if (data['action'] == 'set') {
+          return ResponseBody.fromString(
+            jsonEncode({
+              'token': 'preset_new',
+              'name': data['preset_name'] ?? 'New Preset',
+            }),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType]
+            },
+          );
+        }
+        return ResponseBody.fromString(
+          jsonEncode({'status': 'ok'}),
+          200,
+          headers: {
+            Headers.contentTypeHeader: [Headers.jsonContentType]
+          },
+        );
+      }
+    }
+
+    if (path == Endpoints.onvifProbe) {
+      lastProbeRequest = options;
+      return ResponseBody.fromString(
+        jsonEncode({
+          'success': true,
+          'host': '192.168.1.100',
+          'port': 80,
+          'has_ptz': true,
+          'device_info': {
+            'manufacturer': 'HubSight Corp',
+            'model': 'HS-PTZ-500',
+            'firmware_version': 'v2.1.0',
+            'serial_number': 'SN12345678',
+            'hardware_id': 'HW-01',
+          },
+          'profiles': [
+            {
+              'token': 'profile_main',
+              'name': 'Main Stream',
+              'stream_uri': 'rtsp://192.168.1.100:554/profile_main',
+              'ptz_supported': true,
+              'width': 1920,
+              'height': 1080,
+            }
+          ],
         }),
         200,
         headers: {

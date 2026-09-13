@@ -44,6 +44,11 @@ class Endpoints {
   static String cameraLiveRelease(String id) =>
       '$basePrefix/cameras/$id/live/release';
 
+  // ONVIF & PTZ Controls (Profile S)
+  static String cameraPTZ(String id) => '$basePrefix/cameras/$id/ptz';
+  static String cameraPresets(String id) => '$basePrefix/cameras/$id/presets';
+  static const String onvifProbe = '$basePrefix/onvif/probe';
+
   // Multi-View Batching
   static const String batchLiveWebRTC = '$basePrefix/cameras/live/batch-webrtc';
   static const String batchLiveHeartbeat =
