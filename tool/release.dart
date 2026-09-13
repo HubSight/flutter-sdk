@@ -101,9 +101,12 @@ void main(List<String> rawArgs) async {
 
   print('\nTarget version to release: $bold$green$newVersion$reset');
 
-  if (newVersion == currentVersion) {
+  final tagExists =
+      _runGit(['tag', '-l', 'v$currentVersion']).stdout.trim().isNotEmpty;
+
+  if (newVersion == currentVersion && tagExists) {
     print(
-        '${yellow}⚠️ Target version is identical to current version ($currentVersion). Aborting.$reset');
+        '${yellow}⚠️ Version v$currentVersion is already tagged in git. Aborting.$reset');
     exit(1);
   }
 
@@ -120,9 +123,9 @@ void main(List<String> rawArgs) async {
       'log',
       commitLogRange,
       '--pretty=format:%s',
-    ]).stdout.trim();
+    ]).stdout;
 
-    if (gitLog.isNotEmpty) {
+    if (gitLog is String && gitLog.trim().isNotEmpty) {
       final lines = gitLog
           .split('\n')
           .map((s) => s.trim())
@@ -160,29 +163,38 @@ void main(List<String> rawArgs) async {
   print(categorized.trim());
 
   // 4. Update pubspec.yaml
-  final updatedPubspec = pubspecContent.replaceFirst(
-    'version: $currentVersion',
-    'version: $newVersion',
-  );
-  pubspecFile.writeAsStringSync(updatedPubspec);
-  print('\n${green}✓ Updated pubspec.yaml version to $newVersion$reset');
+  if (newVersion != currentVersion) {
+    final updatedPubspec = pubspecContent.replaceFirst(
+      'version: $currentVersion',
+      'version: $newVersion',
+    );
+    pubspecFile.writeAsStringSync(updatedPubspec);
+    print('\n${green}✓ Updated pubspec.yaml version to $newVersion$reset');
+  } else {
+    print(
+        '\n${green}✓ pubspec.yaml already at target version $newVersion$reset');
+  }
 
   // 5. Update CHANGELOG.md
   final changelogContent = changelogFile.readAsStringSync();
-  final today = DateTime.now().toIso8601String().substring(0, 10);
-  final newChangelogSection = '## $newVersion - $today\n\n$categorized\n';
-
-  final changelogHeaderIndex = changelogContent.indexOf('## ');
-  String updatedChangelog;
-  if (changelogHeaderIndex != -1) {
-    updatedChangelog = changelogContent.substring(0, changelogHeaderIndex) +
-        newChangelogSection +
-        changelogContent.substring(changelogHeaderIndex);
+  if (changelogContent.contains('## $newVersion')) {
+    print('${green}✓ CHANGELOG.md already has section for v$newVersion$reset');
   } else {
-    updatedChangelog = '$changelogContent\n\n$newChangelogSection';
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final newChangelogSection = '## $newVersion - $today\n\n$categorized\n';
+
+    final changelogHeaderIndex = changelogContent.indexOf('## ');
+    String updatedChangelog;
+    if (changelogHeaderIndex != -1) {
+      updatedChangelog = changelogContent.substring(0, changelogHeaderIndex) +
+          newChangelogSection +
+          changelogContent.substring(changelogHeaderIndex);
+    } else {
+      updatedChangelog = '$changelogContent\n\n$newChangelogSection';
+    }
+    changelogFile.writeAsStringSync(updatedChangelog);
+    print('${green}✓ Updated CHANGELOG.md with entry for v$newVersion$reset');
   }
-  changelogFile.writeAsStringSync(updatedChangelog);
-  print('${green}✓ Updated CHANGELOG.md with entry for v$newVersion$reset');
 
   // 6. Run Quality Gate (dart format, dart analyze, flutter test)
   print('\n${yellow}[1/4] Running code formatting (dart format)...$reset');

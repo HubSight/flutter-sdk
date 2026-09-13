@@ -40,18 +40,20 @@ class HubSightApiException extends HubSightException {
 
   factory HubSightApiException.fromJson(
       Map<String, dynamic> json, int? statusCode) {
-    final rawCode = json['code'] as String?;
+    final rawCode = (json['code'] as String?) ?? (json['error'] as String?);
     final code = HubSightErrorCode.fromBackendCode(rawCode, statusCode);
     final devMsg = json['message_en'] as String? ??
         json['message'] as String? ??
-        'HubSight API returned error with code: ${code.wireCode}';
+        (json['error'] is String && json['error'] != json['code']
+            ? json['error'] as String
+            : code.description('en'));
 
     return HubSightApiException(
       code: code,
       statusCode: statusCode,
       developerMessage: devMsg,
       rawResponse: json,
-      details: json['errors'] ?? json['details'],
+      details: json['details'] ?? json['errors'],
     );
   }
 }

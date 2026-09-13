@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.4 - 2026-09-13
+
+### Added
+- **Standardized Machine-Readable API Error Codes**: Aligned with HubSight backend zero-human-readable error response contract (`code`, `error`, `details`). Added support for `authTwoFactorExpired`, `authSessionNotFound`, `authCannotRevokeCurrent`, `authIncorrectPassword`, `authPasswordRequired`, `authMustChangePassword`, `authPasskeyFailed`, `streamNotFound`, `poolUnavailable`, `databaseError`, `storageError`, `storageUnavailable`, `pushTokenRequired`, `configInvalidPinLength`, `configNotFound`, `configPackFailed`, `firebaseInspectFailed`, `invalidInput`, `notFound`, `conflict`, and `tooManyRequests`.
+- **Dual-Locale Error Message Resolver**: Introduced `HubSightDefaultErrorResolver` and `HubSightErrorCode.description([locale])` with built-in English and Vietnamese message mappings matching HubSight WebApp i18n specifications.
+- **H.264 Passthrough Optimization**: Prioritized H.264 video codecs in SDP offers (`_preferH264`) to trigger hardware acceleration on devices and avoid server-side CPU transcoding lag.
+- **Rendering Performance**: Added `RepaintBoundary` and optimized filter quality on `HubSightWebRTCView`.
+
+### Fixed
+- **Regression: Incorrect HTTP API Base URL reintroduced**: `HubSightSDK.initialize()` had reverted to preferring `gateway_url` over `api_base_url` for the Dio client's `baseUrl` (regression from the 1.1.1 fix, introduced in the 1.1.2/1.1.3 device-metadata changes). `initialize()` now consistently uses `api_base_url`, matching `HubSightApiClient.updateConfig()`.
+- **Two-Factor Authentication Status Compatibility**: `AuthResult.fromJson` now accepts both `two_factor_required` and `2fa_required` statuses.
+
 ## 1.1.3 - 2026-09-13
 
 ### Changed

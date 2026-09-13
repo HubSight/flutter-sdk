@@ -103,9 +103,12 @@ class _HubSightWebRTCViewState extends State<HubSightWebRTCView> {
     if (_renderer != null && _renderer!.srcObject != null) {
       return Container(
         color: Colors.black,
-        child: RTCVideoView(
-          _renderer!,
-          objectFit: widget.objectFit,
+        child: RepaintBoundary(
+          child: RTCVideoView(
+            _renderer!,
+            objectFit: widget.objectFit,
+            filterQuality: FilterQuality.low,
+          ),
         ),
       );
     }

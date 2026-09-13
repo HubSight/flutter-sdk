@@ -25,7 +25,11 @@ class AuthResult {
   });
 
   factory AuthResult.fromJson(Map<String, dynamic> json) {
-    if (json['requires_2fa'] == true || json['status'] == '2fa_required') {
+    if (json['requires_2fa'] == true ||
+        json['status'] == '2fa_required' ||
+        json['status'] == 'two_factor_required' ||
+        json['code'] == 'TWO_FACTOR_REQUIRED' ||
+        json['code'] == '2FA_REQUIRED') {
       return AuthResult(
         isSuccess: false,
         requires2FA: true,

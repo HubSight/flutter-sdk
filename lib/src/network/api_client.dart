@@ -140,13 +140,18 @@ class HubSightApiClient {
       }
 
       if (errorMap != null) {
+        final rawCode =
+            (errorMap['code'] as String?) ?? (errorMap['error'] as String?);
         final code = HubSightErrorCode.fromBackendCode(
-          errorMap['code'] as String?,
+          rawCode,
           response?.statusCode,
         );
         final devMsg = errorMap['message_en'] as String? ??
             errorMap['message'] as String? ??
-            'API returned error: ${code.wireCode}';
+            (errorMap['error'] is String &&
+                    errorMap['error'] != errorMap['code']
+                ? errorMap['error'] as String
+                : code.description('en'));
 
         if (response?.statusCode == 401 || response?.statusCode == 403) {
           throw HubSightAuthException(
@@ -154,7 +159,7 @@ class HubSightApiClient {
             statusCode: response?.statusCode,
             developerMessage: devMsg,
             rawResponse: errorMap,
-            details: errorMap['errors'] ?? errorMap['details'],
+            details: errorMap['details'] ?? errorMap['errors'],
           );
         }
 
@@ -163,7 +168,7 @@ class HubSightApiClient {
           statusCode: response?.statusCode,
           developerMessage: devMsg,
           rawResponse: errorMap,
-          details: errorMap['errors'] ?? errorMap['details'],
+          details: errorMap['details'] ?? errorMap['errors'],
         );
       }
 

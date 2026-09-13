@@ -58,6 +58,8 @@ class HubSightWebRTCManager {
           {'urls': 'stun:stun.l.google.com:19302'},
         ],
         'sdpSemantics': 'unified-plan',
+        'bundlePolicy': 'max-bundle',
+        'rtcpMuxPolicy': 'require',
       };
 
       _peerConnection = await createPeerConnection(rtcConfig);
@@ -83,14 +85,24 @@ class HubSightWebRTCManager {
         init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly),
       );
 
-      // Create local SDP Offer
-      final offer = await _peerConnection!.createOffer();
-      await _peerConnection!.setLocalDescription(offer);
+      // Create local SDP Offer with receive-only video constraints
+      final offer = await _peerConnection!.createOffer({
+        'mandatory': {
+          'OfferToReceiveVideo': true,
+          'OfferToReceiveAudio': false,
+        },
+        'optional': [],
+      });
+
+      // Munge SDP to prefer H.264 hardware decoding and avoid server transcoding lag
+      final mungedSdp = _preferH264(offer.sdp ?? '');
+      final sessionDescription = RTCSessionDescription(mungedSdp, 'offer');
+      await _peerConnection!.setLocalDescription(sessionDescription);
 
       // Negotiate SDP Offer with HubSight Gateway
       final response = await _client.rawDio.post(
         Endpoints.cameraLiveWebRTC(cameraId),
-        data: offer.sdp,
+        data: sessionDescription.sdp,
         options: Options(
           contentType: 'application/sdp',
           responseType: ResponseType.plain,
@@ -169,5 +181,42 @@ class HubSightWebRTCManager {
   void dispose() {
     stopStream();
     _statusController.close();
+  }
+
+  /// Rearranges the m=video line in SDP to prioritize H.264 codecs first.
+  /// This ensures ZLMediaKit delivers direct passthrough from RTSP and triggers
+  /// hardware-accelerated decoding (VideoToolbox / MediaCodec) without CPU transcoding.
+  static String _preferH264(String sdp) {
+    final lines = sdp.split('\r\n');
+    final mVideoIndex = lines.indexWhere((l) => l.startsWith('m=video '));
+    if (mVideoIndex == -1) return sdp;
+
+    final h264Payloads = <String>[];
+    for (final line in lines) {
+      if (line.startsWith('a=rtpmap:') &&
+          line.toUpperCase().contains('H264/90000')) {
+        final parts = line.substring('a=rtpmap:'.length).split(' ');
+        if (parts.isNotEmpty) {
+          h264Payloads.add(parts[0]);
+        }
+      }
+    }
+
+    if (h264Payloads.isEmpty) return sdp;
+
+    final mLineParts = lines[mVideoIndex].split(' ');
+    if (mLineParts.length > 3) {
+      final header = mLineParts.sublist(0, 3);
+      final existingPayloads = mLineParts.sublist(3);
+
+      final newPayloads = [
+        ...h264Payloads.where((p) => existingPayloads.contains(p)),
+        ...existingPayloads.where((p) => !h264Payloads.contains(p)),
+      ];
+
+      lines[mVideoIndex] = '${header.join(' ')} ${newPayloads.join(' ')}';
+    }
+
+    return lines.join('\r\n');
   }
 }

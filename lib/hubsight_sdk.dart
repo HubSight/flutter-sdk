@@ -135,12 +135,8 @@ class HubSightSDK {
 
     late HubSightSDK sdk;
 
-    final effectiveBaseUrl = config.urls.gatewayUrl.isNotEmpty
-        ? config.urls.gatewayUrl
-        : config.urls.apiBaseUrl.replaceAll(RegExp(r'/api/?$'), '');
-
     final apiClient = HubSightApiClient(
-      baseUrl: effectiveBaseUrl,
+      baseUrl: config.urls.apiBaseUrl,
       apiKey: config.apiKey,
       storage: secStorage,
       onMaintenance: (m) {
