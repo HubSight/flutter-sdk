@@ -136,13 +136,12 @@ To provide detailed session logging (`login_session` & `known_devices`), both We
 | `geo_country` | string | (Optional) Client-resolved country | `Vietnam` |
 | `geo_region` | string | (Optional) Client-resolved administrative region | `Ho Chi Minh` |
 
-#### 4.4.2. Dual HTTP Header Injection
+#### 4.4.2. Transmission Strictly via Login Payload
 
-Alongside the JSON body, clients attach matching HTTP headers so gateways and logging reverse proxies can inspect device identity on requests that lack bodies:
-- `X-Device-Fingerprint`: Unique device hash
-- `X-Device-Label`: Human-readable device label
-- `X-Client-Type`: Client type identifier (`mobile_ios`, `mobile_android`, `desktop_windows`, `web`)
-- `X-Screen-Resolution`: Screen resolution string
+Device metadata is transmitted strictly via the JSON body payload (`device_info`) during authentication calls (`POST /api/auth/login`, `POST /api/auth/2fa/verify`, `POST /api/auth/passkeys/login/verify`). It is **not** transmitted via custom HTTP headers on general API requests. This architectural decision:
+- Prevents HTTP header encoding failures caused by non-ASCII or UTF-8 characters in device labels or local language strings.
+- Eliminates header overhead on high-frequency API calls (e.g., live snapshot polling, 30s WebRTC heartbeats, multi-view SDP exchanges).
+- Preserves clean, stateless HTTP caching at reverse proxies and edge gateways.
 
 #### 4.4.3. Flutter Integration Implementation
 

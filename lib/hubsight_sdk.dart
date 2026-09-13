@@ -132,7 +132,6 @@ class HubSightSDK {
     await secStorage.saveAppConfig(config);
 
     final collector = deviceCollector ?? DeviceInfoCollector();
-    final deviceMeta = await collector.collect();
 
     late HubSightSDK sdk;
 
@@ -144,7 +143,6 @@ class HubSightSDK {
       baseUrl: effectiveBaseUrl,
       apiKey: config.apiKey,
       storage: secStorage,
-      deviceMetadata: deviceMeta,
       onMaintenance: (m) {
         sdk._maintenanceController.add(m);
         onMaintenance?.call(m);

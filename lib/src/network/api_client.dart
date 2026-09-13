@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../config/app_config.dart';
-import '../security/device_info_collector.dart';
 import '../security/secure_storage.dart';
 import 'auth_interceptor.dart';
 import 'error_codes.dart';
@@ -13,20 +12,17 @@ class HubSightApiClient {
   final HubSightSecureStorage _storage;
   String _baseUrl;
   String _apiKey;
-  HubSightDeviceMetadata? _deviceMetadata;
 
   HubSightApiClient({
     required String baseUrl,
     required String apiKey,
     required HubSightSecureStorage storage,
-    HubSightDeviceMetadata? deviceMetadata,
     void Function()? onSessionExpired,
     void Function(MaintenanceException exception)? onMaintenance,
     Dio? customDio,
   })  : _baseUrl = baseUrl,
         _apiKey = apiKey.isNotEmpty ? apiKey : 'hs_mob_client_default',
         _storage = storage,
-        _deviceMetadata = deviceMetadata,
         _dio = customDio ??
             Dio(
               BaseOptions(
@@ -44,7 +40,6 @@ class HubSightApiClient {
         dio: _dio,
         storage: _storage,
         getApiKey: () => _apiKey,
-        getDeviceMetadata: () => _deviceMetadata,
         onSessionExpired: onSessionExpired,
         onMaintenance: onMaintenance,
       ),
@@ -54,17 +49,12 @@ class HubSightApiClient {
   Dio get rawDio => _dio;
   String get baseUrl => _baseUrl;
   String get apiKey => _apiKey;
-  HubSightDeviceMetadata? get deviceMetadata => _deviceMetadata;
 
   void updateConfig(HubSightAppConfig config) {
     _baseUrl = config.urls.apiBaseUrl;
     _apiKey =
         config.apiKey.isNotEmpty ? config.apiKey : 'hs_mob_client_default';
     _dio.options.baseUrl = _baseUrl;
-  }
-
-  void updateDeviceMetadata(HubSightDeviceMetadata metadata) {
-    _deviceMetadata = metadata;
   }
 
   Future<dynamic> get(

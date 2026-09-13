@@ -485,17 +485,14 @@ func main() {
 
 ### 5.6. Transmitting Device Metadata & Fingerprint on Login
 
-When client applications authenticate (`POST /api/auth/login` or `POST /api/auth/2fa/verify`), they attach `device_info` in the JSON payload and pass matching `X-Device-*` headers:
+When client applications authenticate (`POST /api/auth/login` or `POST /api/auth/2fa/verify`), they attach `device_info` strictly in the JSON request payload:
 
 #### Sample Request:
 ```http
 POST /api/auth/login HTTP/1.1
 Host: gateway.hubsight.internal
 Content-Type: application/json
-X-Client-ID: cli_1234567890
-X-Device-Fingerprint: 3b1a8d0ef9...
-X-Device-Label: Apple iPhone 15 Pro (iOS 17.5.1) • App v1.2.0
-X-Client-Type: mobile_ios
+X-API-Key: hs_mob_client_default
 
 {
   "username": "user1",

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
-import '../security/device_info_collector.dart';
 import '../security/secure_storage.dart';
 import 'endpoints.dart';
 import 'exceptions.dart';
@@ -10,7 +9,6 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
   final Dio _dio;
   final HubSightSecureStorage _storage;
   final String Function() _getApiKey;
-  final HubSightDeviceMetadata? Function() _getDeviceMetadata;
   final void Function()? onSessionExpired;
   final void Function(MaintenanceException exception)? onMaintenance;
 
@@ -21,13 +19,11 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
     required Dio dio,
     required HubSightSecureStorage storage,
     required String Function() getApiKey,
-    required HubSightDeviceMetadata? Function() getDeviceMetadata,
     this.onSessionExpired,
     this.onMaintenance,
   })  : _dio = dio,
         _storage = storage,
-        _getApiKey = getApiKey,
-        _getDeviceMetadata = getDeviceMetadata;
+        _getApiKey = getApiKey;
 
   @override
   Future<void> onRequest(
@@ -39,13 +35,7 @@ class HubSightAuthInterceptor extends QueuedInterceptor {
     options.headers['X-API-Key'] =
         apiKey.isNotEmpty ? apiKey : 'hs_mob_client_default';
 
-    // 2. Client Device Metadata Headers
-    final device = _getDeviceMetadata();
-    if (device != null) {
-      options.headers.addAll(device.toHeaders());
-    }
-
-    // 3. Bearer Token Injection
+    // 2. Bearer Token Injection
     if (!options.headers.containsKey('Authorization')) {
       final token = await _storage.getAccessToken();
       if (token != null && token.isNotEmpty) {

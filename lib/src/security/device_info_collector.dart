@@ -64,18 +64,6 @@ class HubSightDeviceMetadata {
       if (geoRegion != null) 'geo_region': geoRegion,
     };
   }
-
-  static String _toAsciiHeader(String val) {
-    return val.replaceAll(RegExp(r'[^\x20-\x7E]'), '').trim();
-  }
-
-  Map<String, String> toHeaders() {
-    return {
-      'X-Device-Fingerprint': _toAsciiHeader(fingerprint),
-      'X-Device-Label': _toAsciiHeader(deviceLabel),
-      'X-Client-Type': _toAsciiHeader(clientType),
-    };
-  }
 }
 
 /// Collector to detect device information, generate stable fingerprint, and produce metadata.

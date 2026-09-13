@@ -31,11 +31,13 @@ void main() {
     late HubSightApiClient client;
     late MockStorage storage;
     late HubSightAuthManager authManager;
+    late _MockAuthManagerAdapter mockAdapter;
 
     setUp(() {
       storage = MockStorage();
       final dio = Dio(BaseOptions(baseUrl: 'https://cctv.quoctran.space'));
-      dio.httpClientAdapter = _MockAuthManagerAdapter();
+      mockAdapter = _MockAuthManagerAdapter();
+      dio.httpClientAdapter = mockAdapter;
 
       client = HubSightApiClient(
         baseUrl: 'https://cctv.quoctran.space',
@@ -120,7 +122,7 @@ void main() {
       expect(json['geo_latitude'], equals(16.4637));
     });
 
-    test('login with geolocation attaches coordinates to device metadata',
+    test('login with geolocation attaches coordinates to login payload',
         () async {
       final res = await authManager.login(
         username: 'admin',
@@ -133,17 +135,22 @@ void main() {
       );
 
       expect(res.isSuccess, isTrue);
-      expect(client.deviceMetadata?.latitude, equals(10.7769));
-      expect(client.deviceMetadata?.longitude, equals(106.7009));
-      expect(client.deviceMetadata?.accuracy, equals(5.0));
-      expect(client.deviceMetadata?.geoCity, equals('Ho Chi Minh City'));
-      expect(client.deviceMetadata?.geoCountry, equals('Vietnam'));
-      expect(client.deviceMetadata?.toMap()['latitude'], equals(10.7769));
-      expect(client.deviceMetadata?.toMap()['geo_city'],
-          equals('Ho Chi Minh City'));
+      final deviceInfo =
+          mockAdapter.lastLoginPayload?['device_info'] as Map<String, dynamic>?;
+      expect(deviceInfo, isNotNull);
+      expect(deviceInfo?['latitude'], equals(10.7769));
+      expect(deviceInfo?['longitude'], equals(106.7009));
+      expect(deviceInfo?['accuracy'], equals(5.0));
+      expect(deviceInfo?['geo_city'], equals('Ho Chi Minh City'));
+      expect(deviceInfo?['geo_country'], equals('Vietnam'));
+
+      final headers = mockAdapter.lastRequestOptions?.headers ?? {};
+      expect(headers.containsKey('X-Device-Fingerprint'), isFalse);
+      expect(headers.containsKey('X-Device-Label'), isFalse);
+      expect(headers.containsKey('X-Client-Type'), isFalse);
     });
 
-    test('verify2FA with geolocation passes coordinates into device metadata',
+    test('verify2FA with geolocation passes coordinates into 2fa payload',
         () async {
       final res = await authManager.verify2FA(
         preAuthToken: 'pre_auth_tok_81726354',
@@ -154,9 +161,17 @@ void main() {
       );
 
       expect(res.isSuccess, isTrue);
-      expect(client.deviceMetadata?.latitude, equals(21.0285));
-      expect(client.deviceMetadata?.longitude, equals(105.8542));
-      expect(client.deviceMetadata?.geoCity, equals('Hanoi'));
+      final deviceInfo =
+          mockAdapter.last2faPayload?['device_info'] as Map<String, dynamic>?;
+      expect(deviceInfo, isNotNull);
+      expect(deviceInfo?['latitude'], equals(21.0285));
+      expect(deviceInfo?['longitude'], equals(105.8542));
+      expect(deviceInfo?['geo_city'], equals('Hanoi'));
+
+      final headers = mockAdapter.lastRequestOptions?.headers ?? {};
+      expect(headers.containsKey('X-Device-Fingerprint'), isFalse);
+      expect(headers.containsKey('X-Device-Label'), isFalse);
+      expect(headers.containsKey('X-Client-Type'), isFalse);
     });
 
     test('revokeSession revokes session', () async {
@@ -173,16 +188,22 @@ void main() {
 }
 
 class _MockAuthManagerAdapter implements HttpClientAdapter {
+  Map<String, dynamic>? lastLoginPayload;
+  Map<String, dynamic>? last2faPayload;
+  RequestOptions? lastRequestOptions;
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    lastRequestOptions = options;
     final path = options.path;
 
     if (path == Endpoints.authLogin) {
       final data = options.data as Map;
+      lastLoginPayload = Map<String, dynamic>.from(data);
       if (data['username'] == 'user_with_2fa') {
         return ResponseBody.fromString(
           jsonEncode({
@@ -218,6 +239,7 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
     }
 
     if (path == Endpoints.auth2faVerify) {
+      last2faPayload = Map<String, dynamic>.from(options.data as Map);
       return ResponseBody.fromString(
         jsonEncode({
           'status': 'ok',

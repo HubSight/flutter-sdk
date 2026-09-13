@@ -54,7 +54,6 @@ class HubSightAuthManager {
       geoCountry: geoCountry,
       geoRegion: geoRegion,
     );
-    _client.updateDeviceMetadata(device);
 
     final payload = {
       'username': username,
@@ -100,7 +99,6 @@ class HubSightAuthManager {
       geoCountry: geoCountry,
       geoRegion: geoRegion,
     );
-    _client.updateDeviceMetadata(device);
 
     final payload = {
       'pre_auth_token': preAuthToken,
@@ -250,7 +248,6 @@ class HubSightAuthManager {
     Map<String, dynamic>? customDeviceInfo,
   }) async {
     final device = await _deviceCollector.collect();
-    _client.updateDeviceMetadata(device);
 
     final payload = {
       'challenge_id': challengeId,

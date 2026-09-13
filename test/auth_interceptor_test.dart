@@ -50,7 +50,6 @@ void main() {
           dio: dio,
           storage: mockStorage,
           getApiKey: () => 'test_api_key_123',
-          getDeviceMetadata: () => null,
           onMaintenance: (m) => maintenanceEvents.add(m),
           onSessionExpired: () => sessionExpiredCount++,
         ),

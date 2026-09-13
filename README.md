@@ -600,7 +600,7 @@ dart analyze
 
 - **Encrypted Storage**: Sensitive data (Access Tokens, Refresh Tokens, API Keys) is encrypted using **iOS Keychain** (`kSecAttrAccessibleAfterFirstUnlock`) and **Android Keystore** with **EncryptedSharedPreferences**.
 - **In-Memory Ephemeral Decryption**: The decrypted `.hscfg` contents are unpacked strictly in RAM and never written to flash/disk storage, guarding against extraction on rooted/jailbroken devices or backup images.
-- **Hardware Device Fingerprinting**: Each client calculates a unique SHA-256 fingerprint from hardware and OS parameters, sent in `X-Device-Fingerprint`, `X-Device-Model`, and `X-Device-OS` headers to mitigate session hijacking.
+- **Hardware Device Fingerprinting**: Each client calculates a unique SHA-256 fingerprint from hardware and OS parameters, sent in the `device_info` JSON payload during login to establish session binding and mitigate hijacking.
 
 ---
 
