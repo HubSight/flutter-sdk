@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.2 - 2026-09-15
+
+### Added
+- **JWT Access Token Claims**:
+  - Added `HubSightJWTClaims` model to inspect claims (`sub`, `username`, `role`, `session_id`, `expiresAt`, `issuedAt`, `isExpired`) directly client-side.
+  - Added `AuthResult.claims` and `AuthResult.tokenType` (`Bearer`).
+  - Added `HubSightAuthManager.getClaims()` to decode claims from currently stored access tokens without network roundtrips.
+- **Multi-View Batching Models & Camera Service API**:
+  - Added strongly-typed batch models: `BatchWebRTCItem` (supports both `sdpOffer` and `offer`), `BatchWebRTCResultItem`, `BatchHeartbeatItem`, `BatchHeartbeatResponse`, and `BatchReleaseResponse`.
+  - Added `HubSightCameraService.batchWebRTC()`, `batchHeartbeat()`, and `batchRelease()` methods.
+  - Updated `MultiViewStreamSession` to support flexible lease and `camera_ids` payloads.
+- **Dedicated App v1 Passkeys Endpoints**:
+  - Updated `Endpoints.authPasskeyLoginOptions` and `Endpoints.authPasskeyLoginVerify` to align with the new `/api/app/v1/auth/passkeys/login/*` backend routes.
+- **ONVIF Probe Route**:
+  - Aligned `Endpoints.onvifProbe` with backend router path `/api/onvif/probe`.
+
 ## 1.2.1 - 2026-09-13
 
 ### Added
