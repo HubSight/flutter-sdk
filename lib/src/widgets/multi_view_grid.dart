@@ -7,15 +7,19 @@ import 'webrtc_video_view.dart';
 class HubSightMultiViewGrid extends StatefulWidget {
   final MultiViewStreamSession session;
   final List<String> cameraIds;
+  final Map<String, String>? cameraNames;
   final int crossAxisCount;
   final double aspectRatio;
+  final void Function(String cameraId)? onCameraTap;
 
   const HubSightMultiViewGrid({
     super.key,
     required this.session,
     required this.cameraIds,
+    this.cameraNames,
     this.crossAxisCount = 2,
     this.aspectRatio = 16 / 9,
+    this.onCameraTap,
   });
 
   @override
@@ -99,6 +103,7 @@ class _HubSightMultiViewGridState extends State<HubSightMultiViewGrid> {
       ),
       itemBuilder: (context, index) {
         final camId = widget.cameraIds[index];
+        final displayName = widget.cameraNames?[camId] ?? camId;
         final renderer = widget.session.getRenderer(camId);
 
         if (renderer == null) {
@@ -111,30 +116,58 @@ class _HubSightMultiViewGridState extends State<HubSightMultiViewGrid> {
           );
         }
 
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: HubSightWebRTCView(
-                renderer: renderer,
-                objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              ),
-            ),
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(4),
+        return GestureDetector(
+          onTap: widget.onCameraTap != null
+              ? () => widget.onCameraTap!(camId)
+              : null,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: HubSightWebRTCView(
+                    renderer: renderer,
+                    objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  ),
                 ),
-                child: Text(
-                  camId,
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                Positioned(
+                  top: 6,
+                  left: 6,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF10B981),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );

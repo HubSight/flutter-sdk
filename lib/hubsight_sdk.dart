@@ -22,6 +22,7 @@ export 'src/network/auth_interceptor.dart';
 // Auth & Profile
 export 'src/auth/auth_manager.dart';
 export 'src/auth/models/auth_response.dart';
+export 'src/auth/models/jwt_claims.dart';
 export 'src/auth/models/user_profile.dart';
 export 'src/auth/models/session_item.dart';
 export 'src/auth/models/passkey_item.dart';
@@ -31,6 +32,7 @@ export 'src/cameras/camera_service.dart';
 export 'src/cameras/models/camera.dart';
 export 'src/cameras/models/ptz_models.dart';
 export 'src/cameras/models/onvif_models.dart';
+export 'src/cameras/models/batch_models.dart';
 
 // Media & WebRTC
 export 'src/media/webrtc_manager.dart';

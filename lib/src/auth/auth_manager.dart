@@ -4,6 +4,7 @@ import '../network/endpoints.dart';
 import '../security/device_info_collector.dart';
 import '../security/secure_storage.dart';
 import 'models/auth_response.dart';
+import 'models/jwt_claims.dart';
 import 'models/passkey_item.dart';
 import 'models/session_item.dart';
 import 'models/user_profile.dart';
@@ -33,6 +34,13 @@ class HubSightAuthManager {
   Future<bool> get isAuthenticated async {
     final token = await _storage.getAccessToken();
     return token != null && token.isNotEmpty;
+  }
+
+  /// Decode claims from current stored access token without network call.
+  Future<HubSightJWTClaims?> getClaims() async {
+    final token = await _storage.getAccessToken();
+    if (token == null || token.isEmpty) return null;
+    return HubSightJWTClaims.tryParse(token);
   }
 
   /// Primary login with username, password, optional geolocation, and automatic device fingerprinting.

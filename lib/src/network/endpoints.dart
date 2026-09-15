@@ -17,9 +17,9 @@ class Endpoints {
   // Passkeys / FIDO2 (WebAuthn)
   static const String authPasskeys = '/api/auth/passkeys';
   static const String authPasskeyLoginOptions =
-      '/api/auth/passkeys/login/options';
+      '$basePrefix/auth/passkeys/login/options';
   static const String authPasskeyLoginVerify =
-      '/api/auth/passkeys/login/verify';
+      '$basePrefix/auth/passkeys/login/verify';
   static const String authPasskeyRegisterOptions =
       '/api/auth/passkeys/register/options';
   static const String authPasskeyRegisterVerify =
@@ -47,7 +47,7 @@ class Endpoints {
   // ONVIF & PTZ Controls (Profile S)
   static String cameraPTZ(String id) => '$basePrefix/cameras/$id/ptz';
   static String cameraPresets(String id) => '$basePrefix/cameras/$id/presets';
-  static const String onvifProbe = '$basePrefix/onvif/probe';
+  static const String onvifProbe = '/api/onvif/probe';
 
   // Multi-View Batching
   static const String batchLiveWebRTC = '$basePrefix/cameras/live/batch-webrtc';

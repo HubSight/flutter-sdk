@@ -167,6 +167,50 @@ void main() {
       expect(result.profiles.length, equals(1));
       expect(result.profiles[0].token, equals('profile_main'));
     });
+
+    test('batchWebRTC sends batch streams and returns results', () async {
+      final results = await cameraService.batchWebRTC([
+        const BatchWebRTCItem(cameraId: 'cam_front_door', sdpOffer: 'v=0...'),
+      ]);
+
+      expect(results.length, equals(1));
+      expect(results[0].cameraId, equals('cam_front_door'));
+      expect(results[0].sdpAnswer, equals('v=0 answer...'));
+      expect(results[0].poolStreamName, equals('stream_front_door'));
+      expect(results[0].isSuccess, isTrue);
+    });
+
+    test('batchHeartbeat sends leases and cameraIds and returns count',
+        () async {
+      final res = await cameraService.batchHeartbeat(
+        leases: [
+          const BatchHeartbeatItem(
+            cameraId: 'cam_front_door',
+            streamName: 'stream_front_door',
+          ),
+        ],
+        cameraIds: ['cam_front_door'],
+      );
+
+      expect(res.status, equals('ok'));
+      expect(res.renewed, equals(1));
+    });
+
+    test('batchRelease sends leases and cameraIds and returns released count',
+        () async {
+      final res = await cameraService.batchRelease(
+        leases: [
+          const BatchHeartbeatItem(
+            cameraId: 'cam_front_door',
+            streamName: 'stream_front_door',
+          ),
+        ],
+        cameraIds: ['cam_front_door'],
+      );
+
+      expect(res.status, equals('ok'));
+      expect(res.released, equals(1));
+    });
   });
 }
 
@@ -319,6 +363,46 @@ class _MockCameraAdapter implements HttpClientAdapter {
             }
           ],
         }),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.batchLiveWebRTC) {
+      return ResponseBody.fromString(
+        jsonEncode({
+          'status': 'ok',
+          'streams': [
+            {
+              'camera_id': 'cam_front_door',
+              'sdp_answer': 'v=0 answer...',
+              'pool_stream_name': 'stream_front_door',
+              'pool_conn_index': '0',
+            }
+          ],
+        }),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.batchLiveHeartbeat) {
+      return ResponseBody.fromString(
+        jsonEncode({'status': 'ok', 'renewed': 1}),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.batchLiveRelease) {
+      return ResponseBody.fromString(
+        jsonEncode({'status': 'ok', 'released': 1}),
         200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType]

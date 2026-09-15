@@ -60,14 +60,31 @@ class HubSightWebRTCManager {
         'sdpSemantics': 'unified-plan',
         'bundlePolicy': 'max-bundle',
         'rtcpMuxPolicy': 'require',
+        'iceTransportPolicy': 'all',
+        'tcpCandidatePolicy': 'enabled',
       };
 
       _peerConnection = await createPeerConnection(rtcConfig);
 
-      _peerConnection!.onTrack = (RTCTrackEvent event) {
-        if (event.track.kind == 'video' && event.streams.isNotEmpty) {
-          _renderer!.srcObject = event.streams[0];
+      _peerConnection!.onTrack = (RTCTrackEvent event) async {
+        if (event.track.kind == 'video') {
+          if (event.streams.isNotEmpty) {
+            _renderer!.srcObject = event.streams[0];
+          } else {
+            _renderer!.srcObject ??=
+                await createLocalMediaStream('hubsight_stream');
+            _renderer!.srcObject!.addTrack(event.track);
+          }
           _setStatus(StreamStatus.connected);
+        }
+      };
+
+      _peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {
+        if (state == RTCIceConnectionState.RTCIceConnectionStateConnected ||
+            state == RTCIceConnectionState.RTCIceConnectionStateCompleted) {
+          _setStatus(StreamStatus.connected);
+        } else if (state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
+          _setStatus(StreamStatus.failed);
         }
       };
 
@@ -94,7 +111,7 @@ class HubSightWebRTCManager {
         'optional': [],
       });
 
-      // Munge SDP to prefer H.264 hardware decoding and avoid server transcoding lag
+      // Munge SDP to prefer H.264 hardware decoding, add bandwidth, and enable RTCP feedback
       final mungedSdp = _preferH264(offer.sdp ?? '');
       final sessionDescription = RTCSessionDescription(mungedSdp, 'offer');
       await _peerConnection!.setLocalDescription(sessionDescription);
@@ -183,11 +200,18 @@ class HubSightWebRTCManager {
     _statusController.close();
   }
 
-  /// Rearranges the m=video line in SDP to prioritize H.264 codecs first.
-  /// This ensures ZLMediaKit delivers direct passthrough from RTSP and triggers
-  /// hardware-accelerated decoding (VideoToolbox / MediaCodec) without CPU transcoding.
+  /// Query real-time WebRTC receiver statistics (packet loss, fps, jitter, bitrate).
+  Future<List<StatsReport>?> getStats() async {
+    return _peerConnection?.getStats();
+  }
+
+  /// Enhances the SDP Offer:
+  /// 1. Prioritizes H.264 codecs so ZLMediaKit delivers direct RTSP passthrough.
+  /// 2. Injects high bandwidth allocation (b=AS:4000) so ZLMediaKit never throttles or drops frames.
+  /// 3. Injects RTCP feedback (NACK, PLI, FIR, REMB) for H.264 payload types to recover dropped packets and request keyframes immediately on loss.
   static String _preferH264(String sdp) {
-    final lines = sdp.split('\r\n');
+    final delimiter = sdp.contains('\r\n') ? '\r\n' : '\n';
+    final lines = sdp.split(delimiter);
     final mVideoIndex = lines.indexWhere((l) => l.startsWith('m=video '));
     if (mVideoIndex == -1) return sdp;
 
@@ -202,21 +226,44 @@ class HubSightWebRTCManager {
       }
     }
 
-    if (h264Payloads.isEmpty) return sdp;
+    if (h264Payloads.isNotEmpty) {
+      final mLineParts = lines[mVideoIndex].split(' ');
+      if (mLineParts.length > 3) {
+        final header = mLineParts.sublist(0, 3);
+        final existingPayloads = mLineParts.sublist(3);
 
-    final mLineParts = lines[mVideoIndex].split(' ');
-    if (mLineParts.length > 3) {
-      final header = mLineParts.sublist(0, 3);
-      final existingPayloads = mLineParts.sublist(3);
+        final newPayloads = [
+          ...h264Payloads.where((p) => existingPayloads.contains(p)),
+          ...existingPayloads.where((p) => !h264Payloads.contains(p)),
+        ];
 
-      final newPayloads = [
-        ...h264Payloads.where((p) => existingPayloads.contains(p)),
-        ...existingPayloads.where((p) => !h264Payloads.contains(p)),
-      ];
-
-      lines[mVideoIndex] = '${header.join(' ')} ${newPayloads.join(' ')}';
+        lines[mVideoIndex] = '${header.join(' ')} ${newPayloads.join(' ')}';
+      }
     }
 
-    return lines.join('\r\n');
+    final enhancedLines = <String>[];
+    for (int i = 0; i < lines.length; i++) {
+      enhancedLines.add(lines[i]);
+      if (i == mVideoIndex) {
+        // Allocate 4000 kbps (4 Mbps) to ensure crystal-clear 720p/1080p 25-30fps stream
+        enhancedLines.add('b=AS:4000');
+        enhancedLines.add('b=TIAS:4000000');
+      }
+    }
+
+    // Ensure RTCP feedback is enabled for every H264 payload
+    for (final pt in h264Payloads) {
+      final nack = 'a=rtcp-fb:$pt nack';
+      final pli = 'a=rtcp-fb:$pt nack pli';
+      final fir = 'a=rtcp-fb:$pt ccm fir';
+      final remb = 'a=rtcp-fb:$pt goog-remb';
+
+      if (!enhancedLines.contains(nack)) enhancedLines.add(nack);
+      if (!enhancedLines.contains(pli)) enhancedLines.add(pli);
+      if (!enhancedLines.contains(fir)) enhancedLines.add(fir);
+      if (!enhancedLines.contains(remb)) enhancedLines.add(remb);
+    }
+
+    return enhancedLines.join(delimiter);
   }
 }

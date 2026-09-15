@@ -184,6 +184,63 @@ void main() {
       expect(storage.accessToken, isNull);
       expect(authManager.currentUser, isNull);
     });
+
+    test('HubSightJWTClaims correctly parses valid JWT token', () {
+      const validJwt =
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAic3ViIjogInVzcl8wMDEiLCAidXNlcm5hbWUiOiAiYWRtaW4iLCAicm9sZSI6ICJhZG1pbiIsICJzZXNzaW9uX2lkIjogInNlc3NfMDAxIiwgImlzcyI6ICJodWJzaWdodC1hdXRoLXNlcnZpY2UiLCAiZXhwIjogMjUyNDYwODAwMCwgImlhdCI6IDE3ODkwMDAwMDAgfQ.c2lnbmF0dXJl';
+
+      final claims = HubSightJWTClaims.tryParse(validJwt);
+      expect(claims, isNotNull);
+      expect(claims!.userId, equals('usr_001'));
+      expect(claims.username, equals('admin'));
+      expect(claims.role, equals('admin'));
+      expect(claims.sessionId, equals('sess_001'));
+      expect(claims.iss, equals('hubsight-auth-service'));
+      expect(claims.isExpired, isFalse);
+    });
+
+    test('HubSightJWTClaims detects expired JWT token', () {
+      const expiredJwt =
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAic3ViIjogInVzcl8wMDEiLCAidXNlcm5hbWUiOiAiYWRtaW4iLCAicm9sZSI6ICJhZG1pbiIsICJzZXNzaW9uX2lkIjogInNlc3NfMDAxIiwgImlzcyI6ICJodWJzaWdodC1hdXRoLXNlcnZpY2UiLCAiZXhwIjogMTAwMDAwMDAwMCwgImlhdCI6IDkwMDAwMDAwMCB9.c2lnbmF0dXJl';
+
+      final claims = HubSightJWTClaims.tryParse(expiredJwt);
+      expect(claims, isNotNull);
+      expect(claims!.isExpired, isTrue);
+    });
+
+    test('authManager.getClaims decodes claims from stored token', () async {
+      storage.accessToken =
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAic3ViIjogInVzcl8wMDEiLCAidXNlcm5hbWUiOiAiYWRtaW4iLCAicm9sZSI6ICJhZG1pbiIsICJzZXNzaW9uX2lkIjogInNlc3NfMDAxIiwgImlzcyI6ICJodWJzaWdodC1hdXRoLXNlcnZpY2UiLCAiZXhwIjogMjUyNDYwODAwMCwgImlhdCI6IDE3ODkwMDAwMDAgfQ.c2lnbmF0dXJl';
+
+      final claims = await authManager.getClaims();
+      expect(claims, isNotNull);
+      expect(claims!.username, equals('admin'));
+      expect(claims.role, equals('admin'));
+    });
+
+    test('getPasskeyLoginOptions calls App API passkey options endpoint',
+        () async {
+      final options = await authManager.getPasskeyLoginOptions('admin');
+      expect(options['status'], equals('ok'));
+      expect(options['challenge_id'], equals('ch_123'));
+      expect(mockAdapter.lastRequestOptions?.path,
+          equals(Endpoints.authPasskeyLoginOptions));
+    });
+
+    test('verifyPasskeyLogin calls App API passkey verify and saves tokens',
+        () async {
+      final res = await authManager.verifyPasskeyLogin(
+        challengeId: 'ch_123',
+        credential: '{"id":"cred_123"}',
+      );
+
+      expect(res.isSuccess, isTrue);
+      expect(res.tokenType, equals('Bearer'));
+      expect(res.accessToken, equals('jwt_access_token_passkey_ok'));
+      expect(storage.accessToken, equals('jwt_access_token_passkey_ok'));
+      expect(mockAdapter.lastRequestOptions?.path,
+          equals(Endpoints.authPasskeyLoginVerify));
+    });
   });
 }
 
@@ -335,6 +392,39 @@ class _MockAuthManagerAdapter implements HttpClientAdapter {
         path == Endpoints.authLogout) {
       return ResponseBody.fromString(
         jsonEncode({'status': 'ok', 'message': 'success'}),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.authPasskeyLoginOptions) {
+      return ResponseBody.fromString(
+        jsonEncode({'status': 'ok', 'challenge_id': 'ch_123'}),
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        },
+      );
+    }
+
+    if (path == Endpoints.authPasskeyLoginVerify) {
+      return ResponseBody.fromString(
+        jsonEncode({
+          'status': 'ok',
+          'token_type': 'Bearer',
+          'access_token': 'jwt_access_token_passkey_ok',
+          'refresh_token': 'ref_token_passkey_ok',
+          'expires_in': 604800,
+          'user': {
+            'id': 'usr_001',
+            'username': 'admin',
+            'full_name': 'Quản trị viên',
+            'role': 'admin',
+            'permissions': ['*'],
+          },
+        }),
         200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType]

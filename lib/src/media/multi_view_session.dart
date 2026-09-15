@@ -121,7 +121,10 @@ class MultiViewStreamSession {
       try {
         await _client.post(
           Endpoints.batchLiveHeartbeat,
-          data: {'leases': leases},
+          data: {
+            'leases': leases,
+            'camera_ids': _streamNames.keys.toList(),
+          },
         );
       } catch (_) {
         // Next tick will retry
@@ -148,7 +151,10 @@ class MultiViewStreamSession {
       try {
         await _client.post(
           Endpoints.batchLiveRelease,
-          data: {'leases': leases},
+          data: {
+            'leases': leases,
+            'camera_ids': _streamNames.keys.toList(),
+          },
         );
       } catch (_) {}
     }

@@ -1,6 +1,7 @@
 import '../network/api_client.dart';
 import '../network/endpoints.dart';
 import '../security/secure_storage.dart';
+import 'models/batch_models.dart';
 import 'models/camera.dart';
 import 'models/onvif_models.dart';
 import 'models/ptz_models.dart';
@@ -164,5 +165,58 @@ class HubSightCameraService {
       },
     );
     return ONVIFProbeResult.fromJson(Map<String, dynamic>.from(data as Map));
+  }
+
+  /// Negotiate multiple WebRTC camera stream offers in a single HTTP roundtrip.
+  Future<List<BatchWebRTCResultItem>> batchWebRTC(
+    List<BatchWebRTCItem> streams,
+  ) async {
+    final data = await _client.post(
+      Endpoints.batchLiveWebRTC,
+      data: {
+        'streams': streams.map((s) => s.toJson()).toList(),
+      },
+    );
+    final list = (data as Map)['streams'] as List? ?? [];
+    return list
+        .map((e) =>
+            BatchWebRTCResultItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
+  /// Send unified heartbeat ping for active camera streams.
+  Future<BatchHeartbeatResponse> batchHeartbeat({
+    List<BatchHeartbeatItem>? leases,
+    List<String>? cameraIds,
+  }) async {
+    final payload = <String, dynamic>{
+      if (leases != null) 'leases': leases.map((l) => l.toJson()).toList(),
+      if (cameraIds != null) 'camera_ids': cameraIds,
+    };
+
+    final data = await _client.post(
+      Endpoints.batchLiveHeartbeat,
+      data: payload,
+    );
+    return BatchHeartbeatResponse.fromJson(
+        Map<String, dynamic>.from(data as Map));
+  }
+
+  /// Release multiple stream leases concurrently when leaving Multi-View grid.
+  Future<BatchReleaseResponse> batchRelease({
+    List<BatchHeartbeatItem>? leases,
+    List<String>? cameraIds,
+  }) async {
+    final payload = <String, dynamic>{
+      if (leases != null) 'leases': leases.map((l) => l.toJson()).toList(),
+      if (cameraIds != null) 'camera_ids': cameraIds,
+    };
+
+    final data = await _client.post(
+      Endpoints.batchLiveRelease,
+      data: payload,
+    );
+    return BatchReleaseResponse.fromJson(
+        Map<String, dynamic>.from(data as Map));
   }
 }

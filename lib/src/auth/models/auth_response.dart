@@ -1,3 +1,4 @@
+import 'jwt_claims.dart';
 import 'user_profile.dart';
 
 /// Result of a login attempt or 2FA verification.
@@ -7,6 +8,7 @@ class AuthResult {
   final String? preAuthToken;
   final String? accessToken;
   final String? refreshToken;
+  final String tokenType;
   final int? expiresIn;
   final bool mustChangePassword;
   final UserProfile? user;
@@ -18,11 +20,16 @@ class AuthResult {
     this.preAuthToken,
     this.accessToken,
     this.refreshToken,
+    this.tokenType = 'Bearer',
     this.expiresIn,
     this.mustChangePassword = false,
     this.user,
     this.message,
   });
+
+  /// Parse claims if [accessToken] is a valid JWT.
+  HubSightJWTClaims? get claims =>
+      accessToken != null ? HubSightJWTClaims.tryParse(accessToken!) : null;
 
   factory AuthResult.fromJson(Map<String, dynamic> json) {
     if (json['requires_2fa'] == true ||
@@ -52,6 +59,7 @@ class AuthResult {
       requires2FA: false,
       accessToken: (json['access_token'] ?? json['token']) as String?,
       refreshToken: json['refresh_token'] as String?,
+      tokenType: json['token_type'] as String? ?? 'Bearer',
       expiresIn: json['expires_in'] as int?,
       mustChangePassword: json['must_change_password'] as bool? ?? false,
       user: user,
